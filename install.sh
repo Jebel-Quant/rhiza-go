@@ -59,9 +59,6 @@ if [ -z "$VERSION" ]; then
   fi
 fi
 
-# Remove 'v' prefix if present
-VERSION_NUM="${VERSION#v}"
-
 # Construct download URL
 if [ "$OS" = "windows" ]; then
   ARCHIVE_EXT="zip"
