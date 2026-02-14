@@ -20,10 +20,10 @@ Successfully converted the rhiza repository from a Python-based template system 
 #### Added (Go-specific):
 - **Configuration**: `.go-version` (1.23), `go.mod`, `go.sum`, `.golangci.yml`
 - **Makefile modules**:
-  - `go-bootstrap.mk` - Environment setup and dependency management
-  - `go-test.mk` - Testing with coverage, race detection, benchmarks
-  - `go-quality.mk` - Formatting, linting, vetting
-  - `go-docs.mk` - Documentation generation
+  - `bootstrap.mk` - Environment setup and dependency management
+  - `test.mk` - Testing with coverage, race detection, benchmarks
+  - `quality.mk` - Formatting, linting, vetting
+  - `docs.mk` - Documentation generation
 - **Updated**: `.rhiza/rhiza.mk` to use Go tooling instead of uv/Python
 
 ### 3. Go Application Structure

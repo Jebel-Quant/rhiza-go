@@ -350,7 +350,9 @@ Available hooks:
 
 ### Makefile Module Adaptations
 
-#### **`.rhiza/make.d/bootstrap.mk`** → **`go-bootstrap.mk`**
+**Note:** Makefile module names remain the same (`bootstrap.mk`, `test.mk`, `quality.mk`, `docs.mk`) to maintain consistency with the rhiza template system. Only the implementation changes from Python to Go tooling.
+
+#### **`.rhiza/make.d/bootstrap.mk`**
 
 **Python Version:**
 ```makefile
@@ -393,7 +395,7 @@ clean:
 	@rm -rf coverage.out coverage.html
 ```
 
-#### **`.rhiza/make.d/test.mk`** → **`go-test.mk`**
+#### **`.rhiza/make.d/test.mk`**
 
 **Python Version:**
 ```makefile
@@ -427,7 +429,7 @@ test-integration:
 	@go test -v -tags=integration ./...
 ```
 
-#### **`.rhiza/make.d/quality.mk`** → **`go-quality.mk`**
+#### **`.rhiza/make.d/quality.mk`**
 
 **Python Version:**
 ```makefile
@@ -461,7 +463,7 @@ check-deps:
 		(echo "go.mod or go.sum changed, run 'go mod tidy'" && exit 1)
 ```
 
-#### **`.rhiza/make.d/docs.mk`** → **`go-docs.mk`**
+#### **`.rhiza/make.d/docs.mk`**
 
 **Python Version:**
 ```makefile
@@ -713,10 +715,10 @@ bundles:
       - .rhiza/.gitignore
       - .rhiza/.rhiza-version
       - .rhiza/make.d/custom-env.mk
-      - .rhiza/make.d/go-bootstrap.mk      # Go-specific
-      - .rhiza/make.d/go-test.mk           # Go-specific
-      - .rhiza/make.d/go-quality.mk        # Go-specific
-      - .rhiza/make.d/go-docs.mk           # Go-specific
+      - .rhiza/make.d/bootstrap.mk         # Adapted for Go
+      - .rhiza/make.d/test.mk              # Adapted for Go
+      - .rhiza/make.d/quality.mk           # Adapted for Go
+      - .rhiza/make.d/docs.mk              # Adapted for Go
       - .rhiza/make.d/releasing.mk
       - .rhiza/scripts
 
@@ -749,7 +751,7 @@ bundles:
     standalone: true
     requires: []
     files:
-      - .rhiza/make.d/go-test.mk
+      - .rhiza/make.d/test.mk
       - .github/workflows/go_ci.yml
 
   docker:
@@ -830,9 +832,9 @@ include .rhiza/make.d/docker.mk
 
 **Goal**: Create minimal viable Go template
 
-- [ ] Create `.rhiza/make.d/go-bootstrap.mk`
-- [ ] Create `.rhiza/make.d/go-test.mk`
-- [ ] Create `.rhiza/make.d/go-quality.mk`
+- [ ] Create `.rhiza/make.d/bootstrap.mk`
+- [ ] Create `.rhiza/make.d/test.mk`
+- [ ] Create `.rhiza/make.d/quality.mk`
 - [ ] Create `.golangci.yml` configuration
 - [ ] Update `.pre-commit-config.yaml` for Go
 - [ ] Create `go.mod.template` example
@@ -929,9 +931,9 @@ templates:
 **Option A: Separate Go modules**
 ```
 .rhiza/make.d/
-├── go-bootstrap.mk
-├── go-test.mk
-├── go-quality.mk
+├── bootstrap.mk
+├── test.mk
+├── quality.mk
 ├── bootstrap.mk        (Python)
 ├── test.mk             (Python)
 └── quality.mk          (Python)

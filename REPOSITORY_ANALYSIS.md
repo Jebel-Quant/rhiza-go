@@ -563,7 +563,7 @@ Assuming high-quality Go adaptation similar to the Python templates, this could 
      - `pyproject.toml` → `go.mod.template`
      - `ruff.toml` → `.golangci.yml`
      - `.python-version` → `.go-version`
-   - Create `.rhiza/make.d/go-bootstrap.mk`:
+   - Create `.rhiza/make.d/bootstrap.mk`:
      ```makefile
      install: pre-install
          @go mod download

@@ -72,8 +72,8 @@ your-project/
     ├── .rhiza-version          # rhiza CLI version to use
     ├── template-bundles.yml    # Bundle definitions
     ├── make.d/                 # Modular Makefile components
-    │   ├── go-bootstrap.mk
-    │   ├── go-test.mk
+    │   ├── bootstrap.mk
+    │   ├── test.mk
     │   └── ...
     ├── scripts/
     └── docs/
@@ -135,17 +135,17 @@ include .rhiza/rhiza.mk    # ← Pull in all template logic
 
 # .rhiza/make.d/*.mk (template-owned, synced)
 # - Each file provides specific functionality
-# - go-bootstrap.mk: install, clean
-# - go-test.mk: test, benchmark
-# - go-quality.mk: fmt, lint
+# - bootstrap.mk: install, clean
+# - test.mk: test, benchmark
+# - quality.mk: fmt, lint
 # - github.mk: GitHub CLI helpers
 # - releasing.mk: bump, release
 ```
 
 **Result**: Run `make test` and it:
 1. Root Makefile includes `.rhiza/rhiza.mk`
-2. `.rhiza/rhiza.mk` includes `.rhiza/make.d/go-test.mk`
-3. `go-test.mk` defines `test` target
+2. `.rhiza/rhiza.mk` includes `.rhiza/make.d/test.mk`
+3. `test.mk` defines `test` target
 4. `make test` executes → `go test -v -race -coverprofile=coverage.out ./...`
 
 ---

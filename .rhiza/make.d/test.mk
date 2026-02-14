@@ -1,4 +1,4 @@
-## .rhiza/make.d/go-test.mk - Testing and benchmarking targets for Go
+## .rhiza/make.d/test.mk - Testing and benchmarking targets
 # This file provides targets for running the test suite with coverage and
 # executing performance benchmarks.
 

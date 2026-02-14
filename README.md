@@ -178,10 +178,10 @@ rhiza-go/
 │   └── utils/        # Internal utilities
 ├── .rhiza/           # Rhiza-specific scripts and configurations
 │   ├── make.d/       # Modular Makefile components
-│   │   ├── go-bootstrap.mk
-│   │   ├── go-test.mk
-│   │   ├── go-quality.mk
-│   │   └── go-docs.mk
+│   │   ├── bootstrap.mk
+│   │   ├── test.mk
+│   │   ├── quality.mk
+│   │   └── docs.mk
 │   └── rhiza.mk      # Core Makefile logic
 ├── go.mod            # Go module dependencies
 ├── go.sum            # Dependency checksums

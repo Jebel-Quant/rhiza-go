@@ -1,5 +1,5 @@
-## .rhiza/make.d/go-bootstrap.mk - Bootstrap and Installation for Go
-# This file provides targets for setting up the Go development environment,
+## .rhiza/make.d/bootstrap.mk - Bootstrap and Installation
+# This file provides targets for setting up the development environment,
 # installing dependencies, and cleaning project artifacts.
 
 # Declare phony targets (they don't produce files)

@@ -1,4 +1,4 @@
-## .rhiza/make.d/go-quality.mk - Quality and Formatting for Go
+## .rhiza/make.d/quality.mk - Quality and Formatting
 # This file provides targets for code quality checks, linting, and formatting.
 
 # Declare phony targets (they don't produce files)
