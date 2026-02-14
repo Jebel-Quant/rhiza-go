@@ -74,16 +74,36 @@ exclude: |
 
 ### Environment Setup
 
-Setting up your environment is simple:
+Setting up your environment is simple. You can use either `make install` or the standalone `install.sh` script:
 
 ```bash
+# Using make (recommended for development)
 make install
+
+# Or using the standalone script
+./install.sh
+
+# Preview what will be installed
+./install.sh --dry-run
+
+# Install only dependencies (skip dev tools)
+./install.sh --skip-tools
+
+# Verbose output
+./install.sh --verbose
 ```
 
-This single command handles everything:
-1. Checks that Go is installed at the required version
+Both commands handle everything:
+1. Checks that Go is installed at the required version (compatible with major.minor)
 2. Downloads and installs all dependencies from `go.mod`
-3. Installs development tools (golangci-lint, goimports)
+3. Installs development tools (golangci-lint, goimports, govulncheck, gosec)
+4. Verifies installation and provides helpful next steps
+
+The standalone `install.sh` script is particularly useful for:
+- CI/CD pipelines where Make may not be available
+- Quick setup on new systems
+- Custom installation workflows
+- Testing installation in isolation
 
 ### Verifying Installation
 

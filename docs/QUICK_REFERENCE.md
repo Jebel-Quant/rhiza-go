@@ -7,6 +7,9 @@ A concise reference for common Rhiza-Go operations.
 | Command | Description |
 |---------|-------------|
 | `make install` | Install dependencies and set up environment |
+| `./install.sh` | Standalone installation script (alternative to make install) |
+| `./install.sh --dry-run` | Preview installation without making changes |
+| `./install.sh --skip-tools` | Install dependencies only (skip dev tools) |
 | `make test` | Run `go test` with coverage and race detection |
 | `make fmt` | Format code with `go fmt`, `goimports`, `golangci-lint --fix` |
 | `make help` | Show all available targets |
@@ -35,6 +38,42 @@ A concise reference for common Rhiza-Go operations.
 | Command | Description |
 |---------|-------------|
 | `make sync` | Sync templates from upstream Rhiza-Go |
+
+## Installation Script (install.sh)
+
+The standalone `install.sh` script provides a Make-independent way to set up the project:
+
+```bash
+# Standard installation
+./install.sh
+
+# Preview what will be installed
+./install.sh --dry-run
+
+# Install dependencies only (skip dev tools)
+./install.sh --skip-tools
+
+# Show detailed output
+./install.sh --verbose
+
+# Show help
+./install.sh --help
+```
+
+**Features:**
+- ✅ Go version validation (compatible with major.minor versions)
+- ✅ Dependency installation (`go mod download` and `go mod tidy`)
+- ✅ Development tools installation (golangci-lint, goimports, govulncheck, gosec)
+- ✅ GOPATH/bin PATH setup guidance
+- ✅ Installation verification
+- ✅ Dry-run mode for safe preview
+- ✅ POSIX-sh compatible (works on any Unix-like system)
+
+**Use cases:**
+- CI/CD pipelines where Make may not be available
+- Quick setup on new systems without Make
+- Custom installation workflows
+- Testing installation in isolation
 
 ## Running Tests
 

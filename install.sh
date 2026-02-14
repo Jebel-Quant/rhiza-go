@@ -1,0 +1,1 @@
+.rhiza/scripts/install.sh
