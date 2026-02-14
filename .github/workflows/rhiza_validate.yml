@@ -30,9 +30,9 @@ jobs:
           token: ${{ secrets.GH_PAT }}
 
       - name: Validate Rhiza config
-        # don't run this in rhiza itself. Rhiza has no template.yml file.
+        # don't run this in rhiza itself or rhiza-go. These are templates, not consumers.
         # don't run for Go projects that have no pyproject.toml
-        if: ${{ github.repository != 'jebel-quant/rhiza' }}
+        if: ${{ github.repository != 'jebel-quant/rhiza' && github.repository != 'jebel-quant/rhiza-go' }}
         shell: bash
         run: |
           if [ -f "pyproject.toml" ]; then
