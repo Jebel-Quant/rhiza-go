@@ -54,17 +54,17 @@ jobs:
         if: ${{ steps.check_dockerfile.outputs.docker_present == 'true' }}
         uses: docker/setup-buildx-action@v3.12.0
 
-      - name: Read Python version from .python-version
+      - name: Read Go version from .go-version
         if: ${{ steps.check_dockerfile.outputs.docker_present == 'true' }}
-        id: python_version
+        id: go_version
         run: |
-          if [ -f .python-version ]; then
-            PYTHON_VERSION=$(tr -d '[:space:]' < .python-version)
-            echo "version=$PYTHON_VERSION" >> "$GITHUB_OUTPUT"
-            echo "Using Python version: $PYTHON_VERSION"
+          if [ -f .go-version ]; then
+            GO_VERSION=$(tr -d '[:space:]' < .go-version)
+            echo "version=$GO_VERSION" >> "$GITHUB_OUTPUT"
+            echo "Using Go version: $GO_VERSION"
           else
-            echo "version=3.12" >> "$GITHUB_OUTPUT"
-            echo "::warning::.python-version not found, using default 3.12"
+            echo "version=1.23" >> "$GITHUB_OUTPUT"
+            echo "::warning::.go-version not found, using default 1.23"
           fi
 
       - name: Build container image with Docker Buildx (validation only)
@@ -76,7 +76,7 @@ jobs:
           REPO_NAME="${REPO_NAME//[._]/}"
           docker buildx build \
             --file docker/Dockerfile \
-            --build-arg PYTHON_VERSION=${{ steps.python_version.outputs.version }} \
+            --build-arg GO_VERSION=${{ steps.go_version.outputs.version }} \
             --tag "${REPO_NAME}:ci" \
             --load \
             .
