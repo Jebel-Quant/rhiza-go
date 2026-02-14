@@ -1,24 +1,38 @@
-# This file is part of the jebel-quant/rhiza repository
-# (https://github.com/jebel-quant/rhiza).
+# This file is part of the jebel-quant/rhiza-go repository
+# (https://github.com/jebel-quant/rhiza-go).
 #
 # Workflow: Rhiza Validate (GitLab CI)
 #
-# Purpose: Validates Rhiza configuration
+# Purpose: Validates Rhiza configuration for downstream projects.
+#          For Go projects, runs `make validate`. Falls back to `uvx rhiza validate`
+#          for language-agnostic validation.
 #
 # Trigger: This workflow runs on every push and on merge requests to main/master
+
+variables:
+  GO_VERSION: "1.23"
 
 validate:rhiza:
   stage: test
   needs: []
-  image: ghcr.io/astral-sh/uv:0.9.30-bookworm
+  image: golang:${GO_VERSION}-bookworm
   script:
     - |
-      # Don't run this in rhiza itself. Rhiza has no template.yml file.
-      if [ "$CI_PROJECT_PATH" = "jebel-quant/rhiza" ]; then
-        echo "Skipping validation in rhiza repository itself"
+      # Don't run this in rhiza-go itself. Rhiza-go has no template.yml file.
+      if [ "$CI_PROJECT_PATH" = "jebel-quant/rhiza-go" ]; then
+        echo "Skipping validation in rhiza-go repository itself"
         exit 0
       fi
-      uvx "rhiza>=0.8.0" validate .
+
+      # Run Go-based validation if available, otherwise fall back to uvx
+      if make -n validate >/dev/null 2>&1 && make validate; then
+        echo "✅ Go-based validation passed"
+      else
+        echo "⚠️ make validate not available or failed, falling back to uvx rhiza validate"
+        apt-get update && apt-get install -y python3-pip
+        pip install --break-system-packages uv
+        uvx "rhiza>=0.8.0" validate .
+      fi
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH

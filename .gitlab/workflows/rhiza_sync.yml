@@ -1,5 +1,5 @@
-# This file is part of the jebel-quant/rhiza repository
-# (https://github.com/jebel-quant/rhiza).
+# This file is part of the jebel-quant/rhiza-go repository
+# (https://github.com/jebel-quant/rhiza-go).
 #
 # Workflow: Rhiza Sync (GitLab CI)
 #
@@ -13,16 +13,17 @@
 
 sync:template:
   stage: deploy
-  image: ghcr.io/astral-sh/uv:0.9.30-bookworm
+  image: python:3.12-slim
   before_script:
     - apt-get update && apt-get install -y git
+    - pip install --break-system-packages uv
     - git config --global user.name "GitLab CI"
     - git config --global user.email "gitlab-ci@gitlab.com"
   script:
     - |
-      # Don't run this in rhiza itself
-      if [ "$CI_PROJECT_PATH" = "jebel-quant/rhiza" ]; then
-        echo "Skipping sync in rhiza repository itself"
+      # Don't run this in rhiza-go itself
+      if [ "$CI_PROJECT_PATH" = "jebel-quant/rhiza-go" ]; then
+        echo "Skipping sync in rhiza-go repository itself"
         exit 0
       fi
 

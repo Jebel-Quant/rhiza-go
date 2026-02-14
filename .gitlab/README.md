@@ -1,4 +1,4 @@
-# GitLab CI/CD Workflows for Rhiza
+# GitLab CI/CD Workflows for Rhiza-Go
 
 This directory contains GitLab CI/CD workflow configurations that mirror the functionality of the GitHub Actions workflows in `.github/workflows/`.
 
@@ -7,15 +7,13 @@ This directory contains GitLab CI/CD workflow configurations that mirror the fun
 ```
 .gitlab/
 ├── workflows/
-│   ├── rhiza_ci.yml           # Continuous Integration - Python matrix testing
+│   ├── rhiza_ci.yml           # Continuous Integration - Go testing
 │   ├── rhiza_validate.yml     # Rhiza configuration validation
-│   ├── rhiza_deptry.yml       # Dependency checking
-│   ├── rhiza_pre-commit.yml   # Pre-commit hooks
+│   ├── rhiza_pre-commit.yml   # Formatting & linting checks
 │   ├── rhiza_book.yml         # Documentation building (GitLab Pages)
 │   ├── rhiza_sync.yml         # Template synchronization
-│   └── rhiza_release.yml      # Release workflow
-├── template/                  # GitLab CI job templates
-│   └── marimo_job_template.yml.jinja
+│   ├── rhiza_release.yml      # Release workflow (goreleaser)
+│   └── rhiza_renovate.yml     # Automated dependency updates
 └── README.md                  # This file
 
 .gitlab-ci.yml                 # Main GitLab CI configuration (includes all workflows)
@@ -24,17 +22,15 @@ This directory contains GitLab CI/CD workflow configurations that mirror the fun
 ## Workflows
 
 ### 1. CI (`rhiza_ci.yml`)
-**Purpose:** Run tests on multiple Python versions to ensure compatibility.
+**Purpose:** Run Go tests to ensure correctness and compatibility.
 
 **Trigger:**
 - On push to any branch
 - On merge requests to main/master
 
 **Key Features:**
-- Dynamic Python version matrix generation
-- Tests on Python 3.11, 3.12, 3.13
-- Git LFS support
-- UV package manager for dependency management
+- Uses `golang:${GO_VERSION}-bookworm` image
+- Runs `make test` after `go mod download`
 
 **Equivalent GitHub Action:** `.github/workflows/rhiza_ci.yml`
 
@@ -48,51 +44,36 @@ This directory contains GitLab CI/CD workflow configurations that mirror the fun
 - On merge requests to main/master
 
 **Key Features:**
-- Skips validation in the rhiza repository itself
-- Uses uvx for ephemeral environment
+- Skips validation in the rhiza-go repository itself
+- Runs `make validate` for Go projects, falls back to `uvx rhiza validate`
 
 **Equivalent GitHub Action:** `.github/workflows/rhiza_validate.yml`
 
 ---
 
-### 3. Deptry (`rhiza_deptry.yml`)
-**Purpose:** Check for missing and obsolete dependencies.
+### 3. Formatting & Linting (`rhiza_pre-commit.yml`)
+**Purpose:** Run Go formatting and linting checks for code quality.
 
 **Trigger:**
 - On push to any branch
 - On merge requests to main/master
 
 **Key Features:**
-- Automatic source folder detection
-- Identifies unused dependencies
-
-**Equivalent GitHub Action:** `.github/workflows/rhiza_deptry.yml`
-
----
-
-### 4. Pre-commit (`rhiza_pre-commit.yml`)
-**Purpose:** Run pre-commit checks for code quality.
-
-**Trigger:**
-- On push to any branch
-- On merge requests to main/master
-
-**Key Features:**
-- Runs all pre-commit hooks
-- UV environment setup
+- Runs `make fmt` (goimports, golangci-lint)
+- Uses `golang:${GO_VERSION}-bookworm` image
 
 **Equivalent GitHub Action:** `.github/workflows/rhiza_pre-commit.yml`
 
 ---
 
-### 5. Book (`rhiza_book.yml`)
-**Purpose:** Build and deploy documentation to GitLab Pages.
+### 4. Book (`rhiza_book.yml`)
+**Purpose:** Build and deploy Go documentation to GitLab Pages.
 
 **Trigger:**
 - On push to main/master branch
 
 **Key Features:**
-- Combines API docs, test coverage, and notebooks
+- Generates godoc API documentation and coverage reports
 - Deploys to GitLab Pages
 - Controlled by `PUBLISH_COMPANION_BOOK` variable
 
@@ -102,7 +83,7 @@ This directory contains GitLab CI/CD workflow configurations that mirror the fun
 
 ---
 
-### 6. Sync (`rhiza_sync.yml`)
+### 5. Sync (`rhiza_sync.yml`)
 **Purpose:** Synchronize repository with its template.
 
 **Trigger:**
@@ -111,7 +92,7 @@ This directory contains GitLab CI/CD workflow configurations that mirror the fun
 - Web pipeline trigger
 
 **Key Features:**
-- Template materialization with rhiza
+- Template materialization with rhiza CLI
 - Automatic branch creation
 - Manual merge request creation
 
@@ -121,23 +102,35 @@ This directory contains GitLab CI/CD workflow configurations that mirror the fun
 
 ---
 
-### 7. Release (`rhiza_release.yml`)
-**Purpose:** Create releases and publish packages to PyPI.
+### 6. Release (`rhiza_release.yml`)
+**Purpose:** Build Go binaries and create GitLab releases.
 
 **Trigger:**
 - On version tags (e.g., `v1.2.3`)
 
 **Key Features:**
-- Version validation
-- Python package building with Hatch
-- PyPI publishing with twine
+- Version validation against `VERSION` file
+- Go binary building with goreleaser
+- SBOM generation with syft
 - GitLab release creation
 
 **Equivalent GitHub Action:** `.github/workflows/rhiza_release.yml`
 
 **GitLab-specific:**
 - Uses GitLab Releases API instead of GitHub Releases
-- Uses PYPI_TOKEN instead of OIDC Trusted Publishing
+
+---
+
+### 7. Renovate (`rhiza_renovate.yml`)
+**Purpose:** Automated dependency updates via Renovate.
+
+**Trigger:**
+- Scheduled pipelines
+- Manual trigger via web UI
+
+**Key Features:**
+- Language-agnostic dependency management
+- Automatic merge request creation
 
 ---
 
@@ -156,32 +149,20 @@ This directory contains GitLab CI/CD workflow configurations that mirror the fun
 - **GitLab CI:** `artifacts: paths:` and automatic artifact passing between stages
 
 ### 4. **Container Images**
-- **GitHub Actions:** `runs-on: ubuntu-latest` with `uses: actions/setup-python`
-- **GitLab CI:** `image: python:3.12` or specific Docker images
+- **GitHub Actions:** `runs-on: ubuntu-latest` with `uses: actions/setup-go`
+- **GitLab CI:** `image: golang:${GO_VERSION}-bookworm`
 
-### 5. **Matrix Strategy**
-- **GitHub Actions:** Built-in `strategy.matrix` with dynamic values from JSON
-- **GitLab CI:** `parallel.matrix` with limited dynamic support (workaround: child pipelines)
-
-### 6. **Pages Deployment**
+### 5. **Pages Deployment**
 - **GitHub Actions:** `actions/deploy-pages@v4`
 - **GitLab CI:** Job named `pages` with `artifacts: paths: [public]`
 
-### 7. **Secrets and Variables**
+### 6. **Secrets and Variables**
 - **GitHub Actions:** `secrets.*` and `vars.*`
 - **GitLab CI:** `$CI_VARIABLE_NAME` or protected/masked variables
 
-### 8. **Release Management**
+### 7. **Release Management**
 - **GitHub Actions:** `softprops/action-gh-release@v2`
 - **GitLab CI:** GitLab Releases API with `curl` commands
-
-### 9. **Authentication**
-- **GitHub Actions:** OIDC Trusted Publishing for PyPI, `GITHUB_TOKEN` for registry
-- **GitLab CI:** Token-based authentication with `PYPI_TOKEN`, `CI_JOB_TOKEN` for registry
-
-### 10. **Conditional Execution**
-- **GitHub Actions:** `if:` conditions at job/step level
-- **GitLab CI:** `rules:` at job level, `when:` for manual/conditional execution
 
 ---
 
@@ -191,12 +172,11 @@ These variables can be set in GitLab CI/CD settings (Settings > CI/CD > Variable
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `UV_EXTRA_INDEX_URL` | `""` | Extra index URL for UV package manager |
-| `PYPI_REPOSITORY_URL` | `""` | Custom PyPI repository URL (empty = pypi.org) |
-| `PYPI_TOKEN` | N/A | **Secret** - PyPI authentication token |
+| `GO_VERSION` | `1.23` | Go version to use |
 | `PUBLISH_COMPANION_BOOK` | `true` | Whether to publish documentation |
 | `CREATE_MR` | `true` | Whether to create merge request on sync |
 | `PAT_TOKEN` | N/A | **Secret** - Project/Group Access Token for sync |
+| `RENOVATE_TOKEN` | N/A | **Secret** - Token for Renovate dependency updates |
 
 ### Setting Variables
 
@@ -232,10 +212,10 @@ Or use the GitLab UI:
 
 When migrating from GitHub Actions to GitLab CI:
 
-- [ ] Set required CI/CD variables (especially secrets like `PYPI_TOKEN`)
+- [ ] Set required CI/CD variables
 - [ ] Configure Project/Group Access Token for `PAT_TOKEN` (if using sync)
 - [ ] Enable GitLab Pages in project settings (if using book)
-- [ ] Configure scheduled pipelines for sync workflow
+- [ ] Configure scheduled pipelines for sync and renovate workflows
 - [ ] Update any repository-specific configurations
 - [ ] Test each workflow individually
 - [ ] Verify release workflow with a test tag
@@ -256,14 +236,9 @@ When migrating from GitHub Actions to GitLab CI:
    - Verify artifacts are in `public/` directory
    - Check if GitLab Pages is enabled
 
-3. **Matrix jobs don't run in parallel**
-   - GitLab CI has limitations on dynamic matrices
-   - Consider using child pipelines for true parallelism
-
-4. **Release workflow fails**
-   - Verify `PYPI_TOKEN` is set
+3. **Release workflow fails**
    - Check tag format (must start with `v`)
-   - Ensure version in pyproject.toml matches tag
+   - Ensure version in `VERSION` file matches tag
 
 ---
 
@@ -271,7 +246,7 @@ When migrating from GitHub Actions to GitLab CI:
 
 For issues specific to:
 - **GitLab CI syntax:** Refer to [GitLab CI/CD Documentation](https://docs.gitlab.com/ee/ci/)
-- **Rhiza workflows:** See main repository README
+- **Rhiza-Go workflows:** See main repository README
 - **Workflow behavior:** Compare with corresponding GitHub Actions workflows
 
 ---
@@ -290,4 +265,4 @@ When adding or modifying workflows:
 
 ## License
 
-These workflows are part of the jebel-quant/rhiza repository and follow the same license.
+These workflows are part of the jebel-quant/rhiza-go repository and follow the same license.
