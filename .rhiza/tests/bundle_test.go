@@ -85,7 +85,6 @@ func TestBundleFilesExist(t *testing.T) {
 	// These are referenced in bundle definitions but not yet created.
 	knownMissing := map[string]string{
 		"tests/benchmarks":                       "benchmark directory planned for future",
-		".github/workflows/rhiza_security.yml":   "security workflow planned for Phase 6",
 		".github/workflows/rhiza_benchmarks.yml": "benchmark workflow planned for future",
 		".rhiza/make.d/presentation.mk":          "presentation make targets not yet created",
 		".github/workflows/rhiza_book.yml":       "book workflow planned for future",

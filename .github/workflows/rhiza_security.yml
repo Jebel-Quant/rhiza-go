@@ -1,0 +1,58 @@
+# This file is part of the jebel-quant/rhiza-go repository
+# (https://github.com/jebel-quant/rhiza-go).
+#
+# Security Scanning Workflow for Go Projects
+#
+# Runs govulncheck (Go's official vulnerability scanner) and gosec
+# to detect known vulnerabilities and security issues in Go code.
+
+name: (RHIZA) SECURITY
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run weekly on Monday at 06:00 UTC to catch new vulnerabilities
+    - cron: '0 6 * * 1'
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  govulncheck:
+    name: govulncheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: .go-version
+          cache: true
+
+      - name: Install govulncheck
+        run: go install golang.org/x/vuln/cmd/govulncheck@latest
+
+      - name: Run govulncheck
+        run: govulncheck ./...
+
+  gosec:
+    name: gosec
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: .go-version
+          cache: true
+
+      - name: Run gosec
+        uses: securego/gosec@master
+        with:
+          args: ./...

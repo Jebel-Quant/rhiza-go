@@ -40,6 +40,7 @@ bundles:
       - .rhiza/make.d/docs.mk
       - .rhiza/make.d/custom-task.mk
       - .rhiza/make.d/quality.mk
+      - .rhiza/make.d/security.mk
       - .rhiza/make.d/bootstrap.mk
       - .rhiza/make.d/releasing.mk
       - .rhiza/make.d/README.md
@@ -54,6 +55,7 @@ bundles:
       - .gitignore
       - .go-version
       - .golangci.yml
+      - .goreleaser.yml
       - renovate.json
 
       # Documentation files (user-facing docs)
