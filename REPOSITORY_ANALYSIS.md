@@ -571,7 +571,7 @@ Assuming high-quality Go adaptation similar to the Python templates, this could 
      ```
 
 5. **Port Essential Workflows**:
-   - `.github/workflows/go_ci.yml` (replace `rhiza_ci.yml`)
+   - `.github/workflows/rhiza_ci.yml` (Go CI workflow)
    - `.github/workflows/go_lint.yml` (golangci-lint)
    - `.github/workflows/go_release.yml` (goreleaser)
 

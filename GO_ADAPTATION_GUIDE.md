@@ -75,7 +75,7 @@ project-root/
 │
 └── .github/
     └── workflows/              # CI/CD workflows (16 files)
-        ├── rhiza_ci.yml        # [Go: go_ci.yml] - Test matrix
+        ├── rhiza_ci.yml        # Go CI workflow
         ├── rhiza_sync.yml      # Template sync automation
         ├── rhiza_release.yml   # [Go: go_release.yml] - Release automation
         └── ...
@@ -157,7 +157,7 @@ bundles:
     files:
       - .rhiza/make.d/test.mk
       - pytest.ini              # [Go: removed]
-      - .github/workflows/rhiza_ci.yml  # [Go: go_ci.yml]
+      - .github/workflows/rhiza_ci.yml
 
   docker:                       # Containerization
     standalone: true
@@ -585,7 +585,7 @@ repos:
 
 ### GitHub Workflows Adaptation
 
-#### **`.github/workflows/go_ci.yml`** (replaces `rhiza_ci.yml`)
+#### **`.github/workflows/rhiza_ci.yml`** (Go CI workflow)
 
 ```yaml
 name: Go CI
@@ -740,7 +740,7 @@ bundles:
     requires: [core]
     files:
       - .rhiza/make.d/github.mk
-      - .github/workflows/go_ci.yml        # Go-specific
+      - .github/workflows/rhiza_ci.yml        # Go CI workflow
       - .github/workflows/go_lint.yml      # Go-specific
       - .github/workflows/go_release.yml   # Go-specific
       - .github/workflows/rhiza_sync.yml   # Same
@@ -752,7 +752,7 @@ bundles:
     requires: []
     files:
       - .rhiza/make.d/test.mk
-      - .github/workflows/go_ci.yml
+      - .github/workflows/rhiza_ci.yml
 
   docker:
     description: "Docker containerization for Go"
@@ -845,7 +845,7 @@ include .rhiza/make.d/docker.mk
 
 **Goal**: Port all workflows to Go
 
-- [ ] Create `.github/workflows/go_ci.yml`
+- [ ] Create `.github/workflows/rhiza_ci.yml`
 - [ ] Create `.github/workflows/go_lint.yml`
 - [ ] Create `.github/workflows/go_release.yml`
 - [ ] Create `.github/workflows/go_docker.yml`
@@ -980,7 +980,7 @@ uvx rhiza init --language=go
 # Verify templates applied correctly
 test -f go.mod
 test -f .golangci.yml
-test -f .github/workflows/go_ci.yml
+test -f .github/workflows/rhiza_ci.yml
 
 # Test build
 make install
@@ -1080,7 +1080,7 @@ exclude: |
 ```
 
 ### Q: How do I update to newer Go versions?
-**A**: Update `.go-version` and `.github/workflows/go_ci.yml` matrix, then `make sync` to pull other updates.
+**A**: Update `.go-version` and `.github/workflows/rhiza_ci.yml` matrix, then `make sync` to pull other updates.
 
 ### Q: Can I customize Makefile targets?
 **A**: Yes! Add targets to root `Makefile` (before the `include` line) or use hooks:

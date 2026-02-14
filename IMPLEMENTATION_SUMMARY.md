@@ -70,7 +70,7 @@ make clean         # Clean artifacts
 
 ### 5. CI/CD Integration
 
-#### GitHub Actions (`.github/workflows/go_ci.yml`):
+#### GitHub Actions (`.github/workflows/rhiza_ci.yml`):
 - ✅ Multi-version testing (Go 1.23, 1.24)
 - ✅ Code formatting checks
 - ✅ Linting with golangci-lint

@@ -7,7 +7,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Go Version](https://img.shields.io/badge/Go-1.23-00ADD8?logo=go)](https://go.dev/)
-[![CI](https://github.com/Jebel-Quant/rhiza-go/actions/workflows/go_ci.yml/badge.svg?event=push)](https://github.com/Jebel-Quant/rhiza-go/actions/workflows/go_ci.yml)
+[![CI](https://github.com/Jebel-Quant/rhiza-go/actions/workflows/rhiza_ci.yml/badge.svg?event=push)](https://github.com/Jebel-Quant/rhiza-go/actions/workflows/rhiza_ci.yml)
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/jebel-quant/rhiza-go)
 
