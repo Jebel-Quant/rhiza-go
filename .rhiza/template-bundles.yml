@@ -1,7 +1,7 @@
-# Rhiza Template Bundle Definitions
+# Rhiza-Go Template Bundle Definitions
 #
 # This file defines template bundles - pre-configured sets of files that can be
-# included in downstream projects by selecting templates instead of listing
+# included in downstream Go projects by selecting templates instead of listing
 # individual file paths.
 #
 # Usage in downstream projects (.rhiza/template.yml):
@@ -9,13 +9,11 @@
 #   templates:
 #     - tests
 #     - docker
-#     - marimo
 #
 # Instead of manually listing:
 #
 #   include: |
 #     .rhiza/make.d/test.mk
-#     pytest.ini
 #     docker/Dockerfile
 #     ...
 
@@ -28,7 +26,7 @@ bundles:
   # CORE - Required infrastructure
   # ============================================================================
   core:
-    description: "Core Rhiza infrastructure"
+    description: "Core Rhiza infrastructure for Go projects"
     required: true
     standalone: true
     files:
@@ -48,17 +46,14 @@ bundles:
       - .rhiza/scripts
       - .rhiza/docs
       - .rhiza/assets
-      - .rhiza/requirements/README.md
-      - .rhiza/requirements/docs.txt
-      - .rhiza/requirements/tools.txt
 
       # Root configuration files
       - Makefile
       - .pre-commit-config.yaml
       - .editorconfig
       - .gitignore
-      - .python-version
-      - ruff.toml
+      - .go-version
+      - .golangci.yml
       - renovate.json
 
       # Documentation files (user-facing docs)
@@ -81,7 +76,6 @@ bundles:
       - .github/workflows/rhiza_validate.yml
       - .github/workflows/rhiza_sync.yml
       - .github/workflows/rhiza_pre-commit.yml
-      - .github/workflows/rhiza_deptry.yml
       - .github/workflows/rhiza_release.yml
       - .github/actions/configure-git-auth
       - .github/dependabot.yml
@@ -126,7 +120,7 @@ bundles:
   # DOCKER - Docker containerization support
   # ============================================================================
   docker:
-    description: "Docker containerization support for building and running containers"
+    description: "Docker containerization support for building and running Go containers"
     standalone: true
     requires: []
     files:
@@ -161,11 +155,9 @@ bundles:
   # PRESENTATION - Presentation building with reveal.js
   # ============================================================================
   presentation:
-    description: "Presentation building using reveal.js and Marimo"
+    description: "Presentation building using reveal.js"
     standalone: true
     requires: []
-    recommends:
-      - marimo  # Presentations often use Marimo for interactive slides
     files:
       - .rhiza/make.d/presentation.mk
       - docs/PRESENTATION.md
@@ -179,16 +171,14 @@ bundles:
     requires: [core]
     notes: |
       GitLab workflows provide similar functionality to GitHub Actions.
-      Some workflows (like book, ci) may benefit from having their
-      corresponding feature templates (book, tests) also enabled.
+      Some workflows (like ci) may benefit from having their
+      corresponding feature templates (tests) also enabled.
     files:
       # Main GitLab CI configuration
       - .gitlab-ci.yml
 
       # GitLab workflow files
-      - .gitlab/workflows/rhiza_book.yml
       - .gitlab/workflows/rhiza_ci.yml
-      - .gitlab/workflows/rhiza_deptry.yml
       - .gitlab/workflows/rhiza_pre-commit.yml
       - .gitlab/workflows/rhiza_release.yml
       - .gitlab/workflows/rhiza_renovate.yml
@@ -205,17 +195,15 @@ bundles:
       - .gitlab/TESTING.md
 
   # ============================================================================
-  # TESTS - Testing infrastructure with pytest, coverage, and type checking
+  # TESTS - Testing infrastructure with go test, coverage, and benchmarks
   # ============================================================================
   tests:
-    description: "Testing infrastructure with pytest, coverage, and type checking"
+    description: "Testing infrastructure with go test, coverage, race detection, and benchmarks"
     standalone: true
     requires: []
     files:
       # Make targets and configuration
       - .rhiza/make.d/test.mk
-      - .rhiza/requirements/tests.txt
-      - pytest.ini
 
       # Core/generic test files
       - .rhiza/tests
@@ -226,51 +214,25 @@ bundles:
 
       # GitHub Actions workflows
       - .github/workflows/rhiza_ci.yml
-      - .github/workflows/rhiza_mypy.yml
       - .github/workflows/rhiza_security.yml
       - .github/workflows/rhiza_codeql.yml
       - .github/workflows/rhiza_benchmarks.yml
-
-  # ============================================================================
-  # MARIMO - Interactive Marimo notebooks
-  # ============================================================================
-  marimo:
-    description: "Interactive Marimo notebooks for data exploration and documentation"
-    standalone: true
-    requires: []
-    files:
-      # Marimo configuration
-      - .rhiza/make.d/marimo.mk
-      - .rhiza/requirements/marimo.txt
-
-      # Marimo notebooks directory
-      - book/marimo
-
-      # Documentation
-      - docs/MARIMO.md
-
-      # GitHub Actions workflows
-      - .github/workflows/rhiza_marimo.yml
 
   # ============================================================================
   # BOOK - Documentation book generation
   # ============================================================================
   book:
     description: |
-      Comprehensive documentation book generation combining:
-      - API documentation (pdoc)
+      Documentation book generation combining:
+      - Go API documentation (godoc)
       - Test coverage reports
       - Test results
-      - Interactive notebooks (if marimo is enabled)
     standalone: false
     requires:
       - tests  # Required: book needs test coverage and reports
-    recommends:
-      - marimo  # Optional: book works better with notebook exports
     files:
       # Book building configuration
       - .rhiza/make.d/book.mk
-      - .rhiza/templates/minibook
 
       # Documentation
       - docs/BOOK.md
