@@ -1,6 +1,6 @@
-# Rhiza Architecture
+# Rhiza-Go Architecture
 
-Visual diagrams of Rhiza's architecture and component interactions.
+Visual diagrams of Rhiza-Go's architecture and component interactions.
 
 ## System Overview
 
@@ -15,13 +15,12 @@ flowchart TB
         rhizamk[rhiza.mk<br/>Core Logic]
         maked[make.d/*.mk<br/>Extensions]
         scripts[scripts/<br/>Shell Scripts]
-        utils[utils/<br/>Python Utils]
         template[template.yml<br/>Sync Config]
     end
 
     subgraph Config["Configuration"]
-        pyproject[pyproject.toml]
-        ruff[ruff.toml]
+        gomod[go.mod]
+        golangci[.golangci.yml]
         precommit[.pre-commit-config.yaml]
         editorconfig[.editorconfig]
     end
@@ -37,9 +36,7 @@ flowchart TB
     local -.-> rhizamk
     rhizamk --> maked
     rhizamk --> scripts
-    rhizamk --> utils
-    maked --> pyproject
-    utils --> pyproject
+    maked --> gomod
     ci --> make
     release --> make
     security --> make
@@ -108,21 +105,17 @@ flowchart LR
 ```mermaid
 flowchart TD
     tag[Push Tag v*] --> validate[Validate Tag]
-    validate --> build[Build Package]
+    validate --> build[Build Go Binaries]
     build --> draft[Draft GitHub Release]
-    draft --> pypi[Publish to PyPI]
+    draft --> upload[Upload Binaries + SBOM]
     draft --> devcontainer[Publish Devcontainer]
-    pypi --> finalize[Finalize Release]
+    upload --> finalize[Finalize Release]
     devcontainer --> finalize
 
     subgraph Conditions
-        pypi_cond{Has dist/ &<br/>not Private?}
         dev_cond{PUBLISH_DEVCONTAINER<br/>= true?}
     end
 
-    draft --> pypi_cond
-    pypi_cond -->|yes| pypi
-    pypi_cond -->|no| finalize
     draft --> dev_cond
     dev_cond -->|yes| devcontainer
     dev_cond -->|no| finalize
@@ -132,7 +125,7 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-    upstream[Upstream Rhiza<br/>jebel-quant/rhiza] -->|template.yml| sync[make sync]
+    upstream[Upstream Rhiza-Go<br/>jebel-quant/rhiza-go] -->|template.yml| sync[make sync]
     sync -->|updates| downstream[Downstream Project]
 
     subgraph Synced["Synced Files"]
@@ -143,8 +136,9 @@ flowchart LR
 
     subgraph Preserved["Preserved"]
         localmk[local.mk]
-        src[src/]
-        tests[tests/]
+        cmd[cmd/]
+        pkg[pkg/]
+        internal[internal/]
     end
 
     sync --> Synced
@@ -159,22 +153,21 @@ flowchart TD
 
     root --> rhiza[.rhiza/]
     root --> github[.github/]
-    root --> src[src/]
-    root --> tests[tests/]
+    root --> cmd[cmd/]
+    root --> pkg[pkg/]
+    root --> internal[internal/]
     root --> docs[docs/]
-    root --> book[book/]
 
     rhiza --> rhizamk[rhiza.mk]
     rhiza --> maked[make.d/]
     rhiza --> scripts[scripts/]
-    rhiza --> utils[utils/]
     rhiza --> template[template.yml]
 
     github --> workflows[workflows/]
     workflows --> ci[rhiza_ci.yml]
     workflows --> release[rhiza_release.yml]
-    workflows --> security[rhiza_security.yml]
-    workflows --> more[... 11 more]
+    workflows --> codeql[rhiza_codeql.yml]
+    workflows --> more[... more]
 
     maked --> m00[00-19: Config]
     maked --> m20[20-79: Tasks]
@@ -195,50 +188,40 @@ flowchart TD
 
     subgraph Workflows
         ci[CI]
-        security[Security]
         codeql[CodeQL]
         release[Release]
-        deptry[Deptry]
         precommit[Pre-commit]
     end
 
     push --> ci
-    push --> security
     push --> codeql
     pr --> ci
-    pr --> deptry
     pr --> precommit
-    schedule --> security
+    schedule --> codeql
     manual --> ci
     tag --> release
 ```
 
-## Python Execution Model
+## Go Execution Model
 
 ```mermaid
 flowchart LR
     subgraph Commands
         make[make test]
-        direct[Direct Python]
-    end
-
-    subgraph UV["uv Layer"]
-        uv_run[uv run]
-        uvx[uvx]
+        direct[go test]
     end
 
     subgraph Tools
-        pytest[pytest]
-        ruff[ruff]
-        hatch[hatch]
+        gotest[go test ./...]
+        golint[golangci-lint]
+        gofmt[goimports]
+        govet[go vet]
     end
 
-    make --> uv_run
-    uv_run --> pytest
-    uv_run --> ruff
-    uvx --> hatch
+    make --> gotest
+    make --> golint
+    make --> gofmt
+    make --> govet
 
-    direct -.->|Never| pytest
-
-    style direct stroke-dasharray: 5 5
+    direct --> gotest
 ```

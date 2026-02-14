@@ -1,8 +1,8 @@
 # MkDocs configuration for project documentation
 # https://www.mkdocs.org/user-guide/configuration/
 
-site_name: Rhiza Documentation
-site_description: Reusable configuration templates for modern Python projects
+site_name: Rhiza-Go Documentation
+site_description: Reusable configuration templates for modern Go projects
 site_url: ""
 
 # Documentation source directory (relative to this config file location)
@@ -63,7 +63,10 @@ nav:
   - Architecture: ARCHITECTURE.md
   - Quick Reference: QUICK_REFERENCE.md
   - Customization: CUSTOMIZATION.md
+  - Testing: TESTS.md
+  - Security: SECURITY.md
+  - Docker: DOCKER.md
+  - DevContainer: DEVCONTAINER.md
   - Demo: DEMO.md
   - Glossary: GLOSSARY.md
-  - Releasing: RELEASING.md
 

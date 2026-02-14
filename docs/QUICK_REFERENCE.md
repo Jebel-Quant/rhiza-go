@@ -1,14 +1,14 @@
-# Rhiza Quick Reference Card
+# Rhiza-Go Quick Reference Card
 
-A concise reference for common Rhiza operations.
+A concise reference for common Rhiza-Go operations.
 
 ## Essential Commands
 
 | Command | Description |
 |---------|-------------|
 | `make install` | Install dependencies and set up environment |
-| `make test` | Run pytest with coverage |
-| `make fmt` | Format and lint code with ruff |
+| `make test` | Run `go test` with coverage and race detection |
+| `make fmt` | Format code with `go fmt`, `goimports`, `golangci-lint --fix` |
 | `make help` | Show all available targets |
 
 ## Version & Release
@@ -26,14 +26,15 @@ A concise reference for common Rhiza operations.
 | Command | Description |
 |---------|-------------|
 | `make fmt` | Format + lint with auto-fix |
-| `make deptry` | Check for unused/missing dependencies |
+| `make lint` | Run golangci-lint |
+| `make vet` | Run go vet static analysis |
 | `make pre-commit` | Run all pre-commit hooks |
 
 ## Template Sync
 
 | Command | Description |
 |---------|-------------|
-| `make sync` | Sync templates from upstream Rhiza |
+| `make sync` | Sync templates from upstream Rhiza-Go |
 
 ## Running Tests
 
@@ -41,14 +42,18 @@ A concise reference for common Rhiza operations.
 # All tests
 make test
 
-# Specific file
-uv run pytest tests/path/to/test.py -v
+# Specific package
+go test ./pkg/config/ -v
 
 # Specific test function
-uv run pytest tests/path/to/test.py::test_name -v
+go test ./pkg/config/ -run TestConfigName -v
 
-# With output
-uv run pytest -v -s
+# With verbose output
+go test -v -race ./...
+
+# With coverage report
+go test -coverprofile=coverage.out ./...
+go tool cover -html=coverage.out
 ```
 
 ## Directory Structure
@@ -61,7 +66,6 @@ uv run pytest -v -s
 │   ├── 20-79*.mk     # Task definitions
 │   └── 80-99*.mk     # Hook implementations
 ├── scripts/          # Shell scripts (release.sh)
-├── utils/            # Python utilities
 └── template.yml      # Sync configuration
 ```
 
@@ -86,25 +90,27 @@ Extend these with `::` syntax in `local.mk` or `.rhiza/make.d/`:
 
 | File | Purpose |
 |------|---------|
-| `pyproject.toml` | Project metadata, dependencies, version |
-| `uv.lock` | Locked dependency versions |
-| `.python-version` | Default Python version |
-| `ruff.toml` | Linter/formatter configuration |
+| `go.mod` | Go module definition and dependencies |
+| `go.sum` | Dependency checksums for reproducible builds |
+| `.go-version` | Go version (single source of truth) |
+| `VERSION` | Project version (single source of truth) |
+| `.golangci.yml` | Linter configuration (25+ linters) |
 | `local.mk` | Local Makefile customizations (not synced) |
 
-## Python Execution
+## Go Execution
 
-Always use `uv` for Python operations:
+Use Go tooling directly for development:
 
 ```bash
-uv run python script.py    # Run Python script
-uv run pytest              # Run tests
-uvx hatch build            # Run external tool
+go run cmd/rhiza-go/main.go   # Run main application
+go test ./...                  # Run all tests
+go build ./...                 # Build all packages
+go vet ./...                   # Static analysis
 ```
 
 ## Version Format
 
-- Source of truth: `version` field in `pyproject.toml`
+- Source of truth: `VERSION` file
 - Git tags: `v` prefix (e.g., `v1.2.3`)
 - Semantic versioning: `MAJOR.MINOR.PATCH`
 
@@ -114,7 +120,7 @@ uvx hatch build            # Run external tool
 |----------|---------|
 | CI | Push, Pull Request |
 | Release | Tag `v*` |
-| Security | Schedule, Push |
+| CodeQL | Push, Schedule |
 | Sync | Manual |
 
 ## Common Patterns

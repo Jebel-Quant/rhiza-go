@@ -1,6 +1,6 @@
 {
-    "name": "Python Dev (Rhiza)",
-    "image": "mcr.microsoft.com/devcontainers/python:3.14",
+    "name": "Go Dev (Rhiza)",
+    "image": "mcr.microsoft.com/devcontainers/go:1.23",
     "hostRequirements": {
         "cpus": 4
     },
@@ -16,33 +16,29 @@
         "source=${localEnv:HOME}/.ssh,target=/home/vscode/.ssh,type=bind,consistency=cached"
     ],
     "containerEnv": {
-        "INSTALL_DIR": "/home/vscode/.local/bin"
+        "GOPATH": "/home/vscode/go"
     },
-    "forwardPorts": [8080, 2718],
+    "forwardPorts": [8080],
     "customizations": {
         "vscode": {
             "settings": {
-                "python.defaultInterpreterPath": ".venv/bin/python",
-                "python.testing.pytestEnabled": true,
-                "python.testing.unittestEnabled": false,
-                "python.testing.pytestArgs": ["."],
-                "python.terminal.activateEnvInCurrentTerminal": true,
-                "marimo.pythonPath": ".venv/bin/python",
-                "marimo.marimoPath": ".venv/bin/marimo"
+                "go.gopath": "/home/vscode/go",
+                "go.testFlags": ["-v", "-race"],
+                "go.coverOnSave": true,
+                "go.lintTool": "golangci-lint",
+                "go.lintFlags": ["--fast"],
+                "go.formatTool": "goimports",
+                "editor.formatOnSave": true,
+                "[go]": {
+                    "editor.defaultFormatter": "golang.go",
+                    "editor.insertSpaces": false,
+                    "editor.tabSize": 4
+                }
             },
             "extensions": [
-                // Python Development
-                "ms-python.python",
-                "ms-python.vscode-pylance",
-                // Marimo/Notebooks
-                "marimo-team.vscode-marimo",
-                "marimo-ai.marimo-vscode",
-                // Linting and Formatting
-                "charliermarsh.ruff",
+                "golang.go",
                 "tamasfe.even-better-toml",
-                // Build Tools
                 "ms-vscode.makefile-tools",
-                // AI Assistance
                 "github.copilot-chat",
                 "github.copilot",
                 "anthropic.claude-code"

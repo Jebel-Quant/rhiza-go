@@ -25,9 +25,9 @@ style: |
 ---
 
 <!-- _class: lead -->
-# 🌱 Rhiza
+# 🌱 Rhiza-Go
 
-**Reusable Configuration Templates for Modern Python Projects**
+**Reusable Configuration Templates for Modern Go Projects**
 
 ![w:200](assets/rhiza-logo.svg)
 
@@ -37,7 +37,7 @@ style: |
 
 ## 🤔 The Problem
 
-Setting up a new Python project is time-consuming:
+Setting up a new Go project is time-consuming:
 
 - ⚙️ Configuring CI/CD pipelines
 - 🧪 Setting up testing frameworks
@@ -50,7 +50,7 @@ Setting up a new Python project is time-consuming:
 
 ---
 
-## 💡 The Solution: Rhiza
+## 💡 The Solution: Rhiza-Go
 
 A curated collection of **battle-tested templates** that:
 
@@ -58,7 +58,7 @@ A curated collection of **battle-tested templates** that:
 ✅ Enforce best practices
 ✅ Maintain consistency across projects
 ✅ Stay up-to-date automatically
-✅ Support multiple Python versions (3.11-3.14)
+✅ Support Go development with golangci-lint (25+ linters)
 
 ---
 
@@ -74,19 +74,18 @@ A curated collection of **battle-tested templates** that:
 - Version bumping
 
 ### 🧪 Testing
-- pytest configuration
-- CI test matrix
+- `go test` with race detection
+- CI testing
 - Code coverage
-- Documentation tests
+- Benchmarking
 
 </div>
 <div>
 
 ### 📚 Documentation
-- API docs with pdoc
-- Companion book with minibook
+- API docs with godoc
 - Presentation slides with Marp
-- Interactive notebooks
+- Quick reference cards
 
 ### 🔧 Developer Experience
 - Dev containers
@@ -102,10 +101,10 @@ A curated collection of **battle-tested templates** that:
 ## 📁 Available Templates
 
 ### 🌱 Core Project Configuration
-- `.gitignore` — Python project defaults
+- `.gitignore` — Go project defaults
 - `.editorconfig` — Consistent coding standards
-- `ruff.toml` — Linting and formatting
-- `pytest.ini` — Testing framework
+- `.golangci.yml` — Linting with 25+ linters
+- `go.mod` — Go module definition
 - `Makefile` — Common development tasks
 - `CODE_OF_CONDUCT.md` & `CONTRIBUTING.md`
 
@@ -121,53 +120,48 @@ A curated collection of **battle-tested templates** that:
 ### 🚀 CI/CD & Automation
 - `.github/workflows/` — GitHub Actions
 - Automated testing & releases
-- Documentation generation
 - Template synchronization
 
 ---
 
 ## 🎯 Quick Start
 
-### 1. Automated Injection (Recommended)
+### 1. Clone and Set Up
 
 ```bash
-cd /path/to/your/project
-uvx rhiza .
+git clone https://github.com/jebel-quant/rhiza-go.git
+cd rhiza-go
+make install
 ```
 
-This creates `.github/template.yml` and syncs templates automatically.
+### 2. Configure Sync
 
-### 2. Manual Integration
-
-```bash
-# Clone Rhiza
-git clone https://github.com/jebel-quant/rhiza.git /tmp/rhiza
-
-# Copy sync mechanism
-cp /tmp/rhiza/.github/template.yml .github/
-cp /tmp/rhiza/.rhiza/scripts/sync.sh .rhiza/scripts/
-
-# Sync templates
-./.rhiza/scripts/sync.sh
+```yaml
+# .rhiza/template.yml
+repository: Jebel-Quant/rhiza-go
+ref: v0.1.0
+include: |
+  .github/workflows/*.yml
+  .golangci.yml
+  Makefile
 ```
 
 ---
 
 ## 🔄 Template Synchronization
 
-Templates stay up-to-date with Rhiza's latest improvements:
+Templates stay up-to-date with Rhiza-Go's latest improvements:
 
-### Configuration: `.github/template.yml`
+### Configuration: `.rhiza/template.yml`
 
 ```yaml
-repository: Jebel-Quant/rhiza
-ref: v0.7.1
+repository: Jebel-Quant/rhiza-go
+ref: v0.1.0
 
 include: |
   .github/workflows/*.yml
   .pre-commit-config.yaml
-  ruff.toml
-  pytest.ini
+  .golangci.yml
 
 exclude: |
   .rhiza/scripts/customisations/*
@@ -180,7 +174,7 @@ exclude: |
 The `sync.yml` workflow keeps your project current:
 
 - 📅 Runs weekly (configurable)
-- 🔄 Fetches latest templates from Rhiza
+- 🔄 Fetches latest templates from Rhiza-Go
 - 🔍 Applies only included files
 - 🎯 Respects exclude patterns
 - 📝 Creates pull request with changes
@@ -193,37 +187,17 @@ The `sync.yml` workflow keeps your project current:
 ## 🛠️ Makefile: Your Command Center
 
 ```bash
-make install      # Setup project with uv
-make test         # Run pytest test suite
-make fmt          # Run pre-commit hooks
-make docs         # Generate API documentation
-make book         # Build companion book
-make presentation # Generate slides from PRESENTATION.md
-make marimo       # Launch Marimo notebook server
+make install      # Setup project with Go deps & tools
+make test         # Run go test with coverage & race detection
+make fmt          # Format with goimports + golangci-lint --fix
+make lint         # Run golangci-lint
+make vet          # Run go vet
 make bump         # Interactive version bump
 make release      # Tag and release
+make help         # Show all targets
 ```
 
 **Tip**: Run `make help` to see all available targets
-
----
-
-## 📊 Marimo Integration
-
-[Marimo](https://marimo.io/) — Modern interactive Python notebooks
-
-```bash
-make marimo  # Start notebook server
-```
-
-### Features
-- 🔄 Reactive execution
-- 🐍 Pure Python (no JSON)
-- 📦 Self-contained dependencies
-- 🎨 Built-in visualizations
-- 💻 VS Code extension support
-
-Notebooks stored in `book/marimo/` with inline dependency management.
 
 ---
 
@@ -235,7 +209,7 @@ Notebooks stored in `book/marimo/` with inline dependency management.
 # 1. Bump version
 make bump
 # → Interactive prompts for patch/minor/major
-# → Updates pyproject.toml
+# → Updates VERSION file
 # → Commits and pushes changes
 
 # 2. Create release
@@ -246,9 +220,9 @@ make release
 ```
 
 ### Release Automation
-✅ Builds Python package
+✅ Builds Go binaries (linux/darwin/windows × amd64/arm64)
 ✅ Creates GitHub release
-✅ Publishes to PyPI (if public)
+✅ Generates SBOM with syft
 ✅ Publishes devcontainer image (optional)
 
 ---
@@ -257,11 +231,10 @@ make release
 
 ### What You Get
 
-- 🐍 Python 3.14 runtime
-- ⚡ UV package manager
-- 🔧 All project dependencies
+- 🐹 Go runtime environment
+- 🔧 golangci-lint, goimports, and dev tools
+- ⚡ All project dependencies
 - 🧪 Pre-commit hooks
-- 📊 Marimo integration
 - 🔐 SSH agent forwarding
 - 🚀 Port 8080 forwarding
 
@@ -274,67 +247,37 @@ make release
 
 ## 🔧 Customization
 
-### Build Extras
+### Makefile Hooks
 
-Create `.rhiza/scripts/customisations/build-extras.sh`:
+Add to your root `Makefile`:
 
-```bash
-#!/bin/bash
-set -euo pipefail
+```makefile
+post-install::
+	@echo "Installing additional tools..."
+	@go install github.com/securego/gosec/v2/cmd/gosec@latest
 
-# Install system dependencies
-sudo apt-get update
-sudo apt-get install -y graphviz
-
-# Your custom setup here
+##@ Custom Tasks
+generate: ## Run code generation
+	@go generate ./...
 ```
 
-Runs during: `make install`, `make test`, `make book`, `make docs`
-
----
-
-## 🎨 Documentation Customization
-
-### API Documentation (pdoc)
-
-```bash
-mkdir -p book/pdoc-templates
-# Add custom Jinja2 templates
-```
-
-### Companion Book (minibook)
-
-```bash
-mkdir -p book/minibook-templates
-# Create custom.html.jinja2
-```
-
-### Presentations (Marp)
-
-Edit `PRESENTATION.md` and run:
-```bash
-make presentation      # Generate HTML
-make presentation-pdf  # Generate PDF
-make presentation-serve # Interactive preview
-```
+Runs during: `make install`
 
 ---
 
 ## ⚙️ Configuration Variables
 
-Control Python versions via repository variables:
+Override variables in your `Makefile` or `local.mk`:
 
-### `PYTHON_MAX_VERSION`
-- Default: `'3.14'`
-- Tests on 3.11, 3.12, 3.13, 3.14
-- Set to `'3.13'` to exclude 3.14
+```makefile
+# Override test coverage threshold (default: 90)
+COVERAGE_FAIL_UNDER = 80
 
-### `PYTHON_DEFAULT_VERSION`
-- Default: `'3.14'`
-- Used in release, pre-commit, book workflows
-- Set to `'3.12'` for compatibility
+# Include the Rhiza API (template-managed)
+include .rhiza/rhiza.mk
+```
 
-**Set in**: Repository Settings → Secrets and variables → Actions → Variables
+**Set in**: `Makefile`, `local.mk`, or environment variables
 
 ---
 
@@ -348,11 +291,11 @@ Control Python versions via repository variables:
 - ✅ End-of-file fixes
 - ✅ GitHub workflow validation
 
-### Ruff
-- Fast Python linter
-- Replaces flake8, isort, pydocstyle
-- Auto-fixing capabilities
-- Extensive rule selection
+### golangci-lint
+- 25+ linters in parallel
+- Configurable via `.golangci.yml`
+- Auto-fixing with `--fix`
+- Includes gosec, gocritic, errcheck
 
 ---
 
@@ -360,11 +303,10 @@ Control Python versions via repository variables:
 
 ### What Gets Tested
 
-- 📝 README code blocks
-- 🔧 Shell scripts (bump, release)
-- 🎯 Makefile targets
-- 📁 Repository structure
-- 📊 Marimo notebooks
+- 🔧 Go packages with `go test`
+- 🏃 Race condition detection
+- 📊 Code coverage reporting
+- 🎯 Benchmarks with `testing.B`
 
 ### Test Command
 
@@ -372,45 +314,21 @@ Control Python versions via repository variables:
 make test
 ```
 
-Runs `pytest` with coverage reporting and HTML output.
+Runs `go test` with coverage and race detection.
 
 ---
 
 ## 🌐 CI/CD Workflows
 
-### 10 Automated Workflows
+### Automated Workflows
 
-1. **CI** — Test matrix across Python versions
+1. **CI** — Test with coverage and race detection
 2. **PRE-COMMIT** — Validate code quality
-3. **DEPTRY** — Check dependency usage
-4. **BOOK** — Build documentation
-5. **MARIMO** — Validate notebooks
-6. **DOCKER** — Build and publish images
-7. **DEVCONTAINER** — Validate dev environment
-8. **RELEASE** — Automated releases
-9. **SYNC** — Template synchronization
-10. **RHIZA** — Self-injection test
-
----
-
-## 📦 Package Publishing
-
-### PyPI Publication
-
-Automatic if configured as **Trusted Publisher**:
-
-1. Register package on PyPI
-2. Add GitHub Actions as trusted publisher
-3. Release workflow publishes automatically
-
-### Private Packages
-
-Add to `pyproject.toml`:
-```toml
-classifiers = [
-    "Private :: Do Not Upload",
-]
-```
+3. **CODEQL** — Security scanning for Go
+4. **DOCKER** — Build and publish images
+5. **DEVCONTAINER** — Validate dev environment
+6. **RELEASE** — Multi-platform binary releases
+7. **SYNC** — Template synchronization
 
 ---
 
@@ -418,7 +336,7 @@ classifiers = [
 
 ### Perfect For:
 
-- 🆕 New Python projects
+- 🆕 New Go projects
 - 🔄 Standardizing existing projects
 - 👥 Team templates
 - 📚 Educational projects
@@ -426,7 +344,7 @@ classifiers = [
 
 ### Not Ideal For:
 
-- ❌ Non-Python projects
+- ❌ Non-Go projects (see [Rhiza](https://github.com/jebel-quant/rhiza) for Python)
 - ❌ Projects requiring exotic configurations
 - ❌ One-off scripts
 
@@ -441,12 +359,12 @@ classifiers = [
 - ✅ Easy to extend
 - ✅ Works everywhere
 
-### Why UV?
+### Why Go?
 
-- ⚡ 10-100x faster than pip
-- 📦 Handles entire Python ecosystem
-- 🔒 Lock files for reproducibility
-- 🎯 Single tool for everything
+- ⚡ Fast compilation and execution
+- 📦 Single binary deployment
+- 🔒 Strong type system
+- 🎯 Excellent tooling ecosystem
 
 ---
 
@@ -471,20 +389,20 @@ classifiers = [
 
 ## 📈 Project Stats
 
-- 🐍 **Python Versions**: 3.11, 3.12, 3.13, 3.14
+- 🐹 **Go Version**: 1.23
 - 📄 **License**: MIT
-- 🏷️ **Current Version**: 0.3.0
+- 🏷️ **Current Version**: 0.1.0
 - 🔧 **Templates**: 20+ configuration files
-- 🤖 **Workflows**: 10 GitHub Actions
+- 🤖 **Workflows**: 7+ GitHub Actions
 - ⭐ **Badge**: ![Created with Rhiza](https://img.shields.io/badge/synced%20with-rhiza-2FA4A9)
 
 ---
 
 ## 🔗 Useful Links
 
-- 📖 **Repository**: [github.com/jebel-quant/rhiza](https://github.com/jebel-quant/rhiza)
-- 📚 **Issues**: [github.com/jebel-quant/rhiza/issues](https://github.com/jebel-quant/rhiza/issues)
-- 🚀 **Codespaces**: [Open in GitHub Codespaces](https://codespaces.new/jebel-quant/rhiza)
+- 📖 **Repository**: [github.com/jebel-quant/rhiza-go](https://github.com/jebel-quant/rhiza-go)
+- 📚 **Issues**: [github.com/jebel-quant/rhiza-go/issues](https://github.com/jebel-quant/rhiza-go/issues)
+- 🚀 **Codespaces**: [Open in GitHub Codespaces](https://codespaces.new/jebel-quant/rhiza-go)
 - 📝 **Documentation**: Auto-generated with `make docs`
 
 ---
@@ -494,13 +412,10 @@ classifiers = [
 ### Built With
 
 - **GitHub Actions** — CI/CD automation
-- **UV** — Fast Python package management
-- **Ruff** — Fast Python linting
-- **Pytest** — Testing framework
-- **Marimo** — Interactive notebooks
+- **Go** — Fast, reliable programming language
+- **golangci-lint** — Comprehensive Go linting
 - **Marp** — This presentation!
-- **pdoc** — API documentation
-- **minibook** — Companion book
+- **godoc** — API documentation
 
 ---
 
@@ -508,9 +423,9 @@ classifiers = [
 
 ### Three Simple Steps
 
-1. **Try it**: `uvx rhiza .` in your project
-2. **Review**: Check the generated `.github/template.yml`
-3. **Sync**: Run `./.rhiza/scripts/sync.sh`
+1. **Clone**: `git clone https://github.com/jebel-quant/rhiza-go.git`
+2. **Setup**: `make install`
+3. **Test**: `make test`
 
 ### Or Explore First
 
@@ -519,8 +434,8 @@ classifiers = [
 # → Click "Create codespace on main"
 
 # Or clone locally
-git clone https://github.com/jebel-quant/rhiza.git
-cd rhiza
+git clone https://github.com/jebel-quant/rhiza-go.git
+cd rhiza-go
 make install
 make test
 ```
@@ -533,7 +448,7 @@ make test
 
 ## Questions?
 
-**Rhiza** — Your foundation for modern Python projects
+**Rhiza-Go** — Your foundation for modern Go projects
 
 *From the Greek ῥίζα (root) — because every great project needs strong roots*
 
@@ -543,7 +458,8 @@ make test
 
 ```bash
 # Setup
-uvx rhiza .                    # Auto-inject Rhiza
+git clone https://github.com/jebel-quant/rhiza-go.git
+cd rhiza-go
 
 # Development
 make install                   # Install dependencies
@@ -552,15 +468,10 @@ make fmt                       # Format & lint
 
 # Documentation
 make docs                      # API documentation
-make book                      # Companion book
-make presentation              # Generate slides
 
 # Release
 make bump                      # Bump version
 make release                   # Create release
-
-# Notebooks
-make marimo                    # Interactive notebooks
 ```
 
 ---
@@ -569,6 +480,6 @@ make marimo                    # Interactive notebooks
 
 # Ready to Root Your Project?
 
-**Get Started**: [github.com/jebel-quant/rhiza](https://github.com/jebel-quant/rhiza)
+**Get Started**: [github.com/jebel-quant/rhiza-go](https://github.com/jebel-quant/rhiza-go)
 
 ![w:300](assets/rhiza-logo.svg)
