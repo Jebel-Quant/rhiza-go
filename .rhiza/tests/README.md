@@ -1,6 +1,6 @@
 # Rhiza Test Suite
 
-This directory is reserved for Go-based template validation tests.
+This directory contains Go-based template validation tests for the rhiza-go project.
 
 ## Purpose
 
@@ -11,17 +11,22 @@ from this template will receive a correct set of files.
 ## Running Tests
 
 ```bash
-make rhiza-test
+make rhiza-test    # Run template self-tests
+make validate      # Run full validation (tests + local checks)
 ```
 
-This target looks for `*_test.go` files in this directory and runs them with `go test`.
+The `rhiza-test` target looks for `*_test.go` files in this directory and runs them
+with `go test`. The `validate` target additionally checks bundle file existence,
+Makefile targets, and Go code compilation.
 
-## Future Tests
+## Test Files
 
-Template validation tests will be added in Phase 5 of the roadmap:
-
-- Structure tests: validate expected files exist (`.go-version`, `go.mod`, `.golangci.yml`)
-- Bundle tests: validate that every file referenced in `template-bundles.yml` exists
-- Makefile tests: validate that key targets exist (`install`, `test`, `fmt`, `lint`, `clean`)
-- Config tests: validate `.golangci.yml` parses correctly
-- Version tests: validate `.go-version` contains a valid Go version
+| File | Description |
+|------|-------------|
+| `structure_test.go` | Validates expected files and directories exist |
+| `bundle_test.go` | Validates `template-bundles.yml` structure and file references |
+| `makefile_test.go` | Validates required Makefile targets are defined |
+| `config_test.go` | Validates `.golangci.yml` parses correctly and has required linters |
+| `version_test.go` | Validates `.go-version` and `VERSION` contain valid versions |
+| `script_test.go` | Validates `release.sh` has correct shebang and is executable |
+| `helpers.go` | Shared test utilities (repo root detection, path helpers) |
