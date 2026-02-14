@@ -3,7 +3,7 @@
 # installing dependencies, and cleaning project artifacts.
 
 # Declare phony targets (they don't produce files)
-.PHONY: install-go install build clean pre-install post-install
+.PHONY: install-go install-uv install build clean pre-install post-install
 
 # Hook targets (double-colon rules allow multiple definitions)
 pre-install:: ; @:
@@ -15,6 +15,25 @@ export GO_VERSION
 
 # Go binary location
 GO_BIN ?= $(shell command -v go 2>/dev/null || echo "go")
+
+##@ Bootstrap
+install-uv: ## ensure uv/uvx is installed
+	# Ensure the ${INSTALL_DIR} folder exists
+	@mkdir -p ${INSTALL_DIR}
+
+	# Install uv/uvx only if they are not already present in PATH or in the install dir
+	@if command -v uv >/dev/null 2>&1 && command -v uvx >/dev/null 2>&1; then \
+	  :; \
+	elif [ -x "${INSTALL_DIR}/uv" ] && [ -x "${INSTALL_DIR}/uvx" ]; then \
+	  printf "${BLUE}[INFO] uv and uvx already installed in ${INSTALL_DIR}, skipping.${RESET}\n"; \
+	else \
+	  printf "${BLUE}[INFO] Installing uv and uvx into ${INSTALL_DIR}...${RESET}\n"; \
+	  if ! curl -LsSf https://astral.sh/uv/install.sh | UV_INSTALL_DIR="${INSTALL_DIR}" sh >/dev/null 2>&1; then \
+	    printf "${RED}[ERROR] Failed to install uv${RESET}\n"; \
+	    exit 1; \
+	  fi; \
+	fi
+
 
 ##@ Bootstrap
 install-go: ## ensure Go is installed at the required version
@@ -34,7 +53,7 @@ install-go: ## ensure Go is installed at the required version
 	  exit 1; \
 	fi
 
-install: pre-install install-go ## install Go dependencies
+install: pre-install install-go install-uv ## install Go dependencies
 	@printf "${BLUE}[INFO] Installing Go dependencies...${RESET}\n"
 	
 	# Download dependencies
