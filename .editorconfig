@@ -13,7 +13,6 @@ charset = utf-8
 # Go source files (tabs per Go convention)
 [*.go]
 indent_style = tab
-indent_size = 4
 
 # Text and documentation files
 [*.{rst,txt}]
