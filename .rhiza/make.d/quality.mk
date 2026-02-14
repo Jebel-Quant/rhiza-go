@@ -28,7 +28,7 @@ check-fmt: install-go ## check if Go code is formatted
 	  printf "${GREEN}[PASS] All Go files are properly formatted${RESET}\n"; \
 	fi
 
-lint: install-go ## run golangci-lint
+lint: build ## run golangci-lint
 	@printf "${BLUE}[INFO] Running golangci-lint...${RESET}\n"
 	@if command -v golangci-lint >/dev/null 2>&1; then \
 	  golangci-lint run ./...; \
@@ -40,7 +40,7 @@ lint: install-go ## run golangci-lint
 	  $(shell go env GOPATH)/bin/golangci-lint run ./...; \
 	fi
 
-vet: install-go ## run go vet
+vet: build ## run go vet
 	@printf "${BLUE}[INFO] Running go vet...${RESET}\n"
 	@$(GO_BIN) vet ./...
 
@@ -48,4 +48,4 @@ tidy: install-go ## tidy go.mod and go.sum
 	@printf "${BLUE}[INFO] Tidying go.mod...${RESET}\n"
 	@$(GO_BIN) mod tidy
 
-all: fmt vet lint test ## run all quality checks and tests
+all: build fmt vet lint test ## run all quality checks and tests

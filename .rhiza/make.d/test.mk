@@ -10,21 +10,21 @@ COVERAGE_THRESHOLD ?= 80
 
 ##@ Development and Testing
 
-test: install ## run all tests
+test: build ## run all tests
 	@printf "${BLUE}[INFO] Running tests...${RESET}\n"
 	@$(GO_BIN) test ./... -v -cover
 
-test-verbose: install ## run tests with verbose output
+test-verbose: build ## run tests with verbose output
 	@printf "${BLUE}[INFO] Running tests with verbose output...${RESET}\n"
 	@$(GO_BIN) test ./... -v -coverprofile=coverage.out
 	@$(GO_BIN) tool cover -html=coverage.out -o coverage.html
 	@printf "${BLUE}[INFO] Coverage report generated: coverage.html${RESET}\n"
 
-test-short: install ## run short tests (skip long-running tests)
+test-short: build ## run short tests (skip long-running tests)
 	@printf "${BLUE}[INFO] Running short tests...${RESET}\n"
 	@$(GO_BIN) test ./... -short
 
-test-coverage: install ## run tests with coverage report
+test-coverage: build ## run tests with coverage report
 	@printf "${BLUE}[INFO] Running tests with coverage...${RESET}\n"
 	@$(GO_BIN) test ./... -coverprofile=coverage.out -covermode=atomic
 	@$(GO_BIN) tool cover -func=coverage.out
@@ -40,10 +40,10 @@ test-coverage: install ## run tests with coverage report
 	  fi; \
 	fi
 
-test-race: install ## run tests with race detector
+test-race: build ## run tests with race detector
 	@printf "${BLUE}[INFO] Running tests with race detector...${RESET}\n"
 	@$(GO_BIN) test ./... -race
 
-benchmark: install ## run performance benchmarks
+benchmark: build ## run performance benchmarks
 	@printf "${BLUE}[INFO] Running benchmarks...${RESET}\n"
 	@$(GO_BIN) test ./... -bench=. -benchmem -run=^$$ -benchtime=5s

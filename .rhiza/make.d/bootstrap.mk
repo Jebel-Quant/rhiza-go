@@ -3,7 +3,7 @@
 # installing dependencies, and cleaning project artifacts.
 
 # Declare phony targets (they don't produce files)
-.PHONY: install-go install clean pre-install post-install
+.PHONY: install-go install build clean pre-install post-install
 
 # Hook targets (double-colon rules allow multiple definitions)
 pre-install:: ; @:
@@ -54,6 +54,13 @@ install: pre-install install-go ## install Go dependencies
 	@$(GO_BIN) install github.com/securego/gosec/v2/cmd/gosec@latest || true
 	
 	@$(MAKE) post-install
+
+build: install ## build Go binaries
+	@printf "${BLUE}[INFO] Building Go binaries...${RESET}\n"
+	@$(GO_BIN) build -v ./...
+	@mkdir -p bin
+	@$(GO_BIN) build -o bin/ ./cmd/...
+	@printf "${GREEN}[PASS] Binaries built to bin/${RESET}\n"
 
 clean: ## Clean project artifacts and stale local branches
 	@printf "%bCleaning project...%b\n" "$(BLUE)" "$(RESET)"

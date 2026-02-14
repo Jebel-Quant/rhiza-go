@@ -10,7 +10,7 @@
 
 security: govulncheck gosec ## run all security checks (govulncheck + gosec)
 
-govulncheck: install-go ## run Go vulnerability scanner
+govulncheck: build ## run Go vulnerability scanner
 	@printf "${BLUE}[INFO] Running govulncheck...${RESET}\n"
 	@if command -v govulncheck >/dev/null 2>&1; then \
 	  govulncheck ./...; \

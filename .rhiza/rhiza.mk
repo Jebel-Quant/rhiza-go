@@ -118,8 +118,8 @@ validate: pre-validate rhiza-test ## validate project structure against template
 	@$(GO_BIN) test ./.rhiza/tests/... -run TestMakefileTargetsExist -count=1 > /dev/null 2>&1 && \
 		printf "${GREEN}[PASS] All required Makefile targets exist${RESET}\n" || \
 		printf "${RED}[FAIL] Some Makefile targets are missing${RESET}\n"
-	@# Check Go code compiles
-	@$(GO_BIN) build ./... > /dev/null 2>&1 && \
+	@# Check Go code compiles (via build target)
+	@$(MAKE) build > /dev/null 2>&1 && \
 		printf "${GREEN}[PASS] Go code compiles successfully${RESET}\n" || \
 		printf "${RED}[FAIL] Go code compilation failed${RESET}\n"
 	@if git remote get-url origin 2>/dev/null | grep -iqE 'jebel-quant/rhiza-go(\.git)?$$'; then \

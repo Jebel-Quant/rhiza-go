@@ -11,6 +11,7 @@ import (
 func TestMakefileTargetsExist(t *testing.T) {
 	requiredTargets := []string{
 		"install",
+		"build",
 		"test",
 		"fmt",
 		"lint",
