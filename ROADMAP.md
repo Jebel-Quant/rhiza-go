@@ -72,29 +72,46 @@ However, the **infrastructure layer** — release pipeline, template sync, agent
    - Maintains same UX (prompts, dry-run, colour output, safety checks)
 
 3. ✅ **Rewrote `.rhiza/make.d/releasing.mk`** for Go
-   - `bump` target: increments patch version in `VERSION` file using shell
-   - `bump-minor` and `bump-major` targets: for minor and major version bumps
+   - Uses `rhiza[tools]>=0.8.6` via `uv tool run` for version bumping
+   - Reads configuration from `.rhiza/.cfg.toml`
+   - `bump` target: uses rhiza[tools] to increment patch version
    - `release` target: calls the rewritten release script
-   - Removed `pyproject.toml`, `uv`, and Python `rhiza[tools]` references
+   - Added dependency on `install-uv` target
 
-4. ✅ **Updated `.rhiza/.cfg.toml`** for Go
+4. ✅ **Created minimal `pyproject.toml`** for rhiza[tools] compatibility
+   - Contains project name, version, and description
+   - Required for rhiza[tools] to function
+   - Bumped atomically with VERSION file
+
+5. ✅ **Updated `.rhiza/.cfg.toml`** for Go
    - Removed bumpversion pre-commit hooks that referenced `uv sync` and `uv.lock`
-   - Updated to target `VERSION` file instead of `pyproject.toml`
-   - Note: `.cfg.toml` kept for potential future use with bump2version if needed
+   - Configured to bump both `VERSION` file and `pyproject.toml`
+   - Used by rhiza[tools] for version management
 
-5. ✅ **Rewrote `.github/workflows/rhiza_release.yml`** for Go
+6. ✅ **Added `install-uv` target** to `.rhiza/make.d/bootstrap.mk`
+   - Automatically detects and uses system UV if available
+   - Falls back to installing UV locally if needed
+   - Defines `UVX_BIN` as `uv tool run` for executing Python tools
+
+7. ✅ **Rewrote `.github/workflows/rhiza_release.yml`** for Go
    - Replaced Python/uv setup with Go setup
    - Builds Go binaries for linux/darwin/windows (amd64/arm64)
    - Generates SBOM using `syft` (instead of Python `cyclonedx-bom`)
    - Removed PyPI publishing job entirely
    - Kept: draft release, SBOM generation, SLSA attestations, devcontainer publishing
 
+8. ✅ **Fixed `.github/workflows/rhiza_validate.yml`**
+   - Added exclusion for `jebel-quant/rhiza-go` repository
+   - Prevents validation errors for template repositories
+   - Template repos don't have `.rhiza/template.yml` by design
+
 #### Validation Results
 
-- ✅ `make bump` increments the version in `VERSION` and creates a commit
+- ✅ `make bump` uses rhiza[tools] to increment the version in `VERSION` and `pyproject.toml`, creates a commit
 - ✅ `.rhiza/scripts/release.sh --dry-run` shows correct tag without pushing
 - ✅ `make release` would create a git tag matching `VERSION` and push it
-- ✅ The release workflow does NOT reference Python, `uv`, `hatch`, or `pyproject.toml`
+- ✅ The release workflow builds Go binaries with syft SBOM generation
+- ✅ Validation workflow correctly skips rhiza-go template repository
 - ⏸️ GitHub Actions `rhiza_release.yml` not yet tested (will be validated when first tag is pushed)
 
 **What's Done (Go-adapted):**
@@ -102,13 +119,23 @@ However, the **infrastructure layer** — release pipeline, template sync, agent
 | File | Status |
 |------|--------|
 | `VERSION` | ✅ Created with version 0.1.0 |
-| `.rhiza/make.d/releasing.mk` | ✅ Go-native version bumping |
+| `pyproject.toml` | ✅ Minimal file for rhiza[tools] compatibility |
+| `.rhiza/make.d/releasing.mk` | ✅ Uses rhiza[tools] for version bumping |
+| `.rhiza/make.d/bootstrap.mk` | ✅ Added install-uv target |
 | `.rhiza/scripts/release.sh` | ✅ Reads VERSION file |
-| `.rhiza/.cfg.toml` | ✅ Updated for VERSION file |
+| `.rhiza/.cfg.toml` | ✅ Bumps VERSION and pyproject.toml |
 | `.github/workflows/rhiza_release.yml` | ✅ Go builds, syft SBOM, no PyPI |
+| `.github/workflows/rhiza_validate.yml` | ✅ Skips rhiza-go template repo |
 
 **Next Agent Instructions:**
-The release pipeline is ready for Go. To test it end-to-end:
+The release pipeline is ready for Go. Key implementation details:
+- Version bumping uses `rhiza[tools]` via `uv tool run` (consistent with Python rhiza)
+- Configuration is in `.rhiza/.cfg.toml` (bumps VERSION and pyproject.toml atomically)
+- Minimal `pyproject.toml` exists for rhiza[tools] compatibility
+- `install-uv` target auto-detects system UV or installs locally
+- Validation workflow skips rhiza-go (it's a template, not a consumer)
+
+To test the release pipeline end-to-end:
 1. Ensure all changes are committed and pushed
 2. Run `make release --dry-run` to verify the process
 3. When ready for a real release, run `make release` to create and push the tag
