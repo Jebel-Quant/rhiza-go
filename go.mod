@@ -1,4 +1,4 @@
-module github.com/Jebel-Quant/rhiza-go
+module github.com/jebel-quant/rhiza-go
 
 go 1.23
 

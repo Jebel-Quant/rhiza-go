@@ -7,10 +7,12 @@ import (
 
 // SanitizePath sanitizes a file path by removing dangerous characters
 func SanitizePath(path string) string {
-	// Clean the path to remove path traversal attempts
+	// Clean the path to normalize it
 	path = filepath.Clean(path)
-	// Remove any remaining .. sequences
+	// Remove any remaining .. sequences after cleaning
 	path = strings.ReplaceAll(path, "..", "")
+	// Clean up any duplicate slashes that may result
+	path = filepath.Clean(path)
 	return path
 }
 

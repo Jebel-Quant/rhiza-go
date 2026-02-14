@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Jebel-Quant/rhiza-go/pkg/config"
+	"github.com/jebel-quant/rhiza-go/pkg/config"
 )
 
 func main() {

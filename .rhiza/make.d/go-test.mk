@@ -46,4 +46,4 @@ test-race: install ## run tests with race detector
 
 benchmark: install ## run performance benchmarks
 	@printf "${BLUE}[INFO] Running benchmarks...${RESET}\n"
-	@$(GO_BIN) test ./... -bench=. -benchmem -run=^# -benchtime=5s
+	@$(GO_BIN) test ./... -bench=. -benchmem -run=^$$ -benchtime=5s

@@ -7,7 +7,7 @@ func TestSanitizePath(t *testing.T) {
 		input    string
 		expected string
 	}{
-		{"../../../etc/passwd", "///etc/passwd"}, // filepath.Clean preserves leading .. replacements
+		{"../../../etc/passwd", "/etc/passwd"}, // filepath.Clean resolves .., then we remove remaining .. sequences
 		{"normal/path", "normal/path"},
 		{"path/../to/file", "to/file"}, // filepath.Clean resolves path/..
 		{"./test", "test"},
