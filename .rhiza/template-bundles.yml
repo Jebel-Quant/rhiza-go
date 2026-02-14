@@ -187,9 +187,6 @@ bundles:
       - .gitlab/workflows/rhiza_sync.yml
       - .gitlab/workflows/rhiza_validate.yml
 
-      # GitLab templates
-      - .gitlab/template
-
       # GitLab documentation
       - .gitlab/COMPARISON.md
       - .gitlab/README.md
