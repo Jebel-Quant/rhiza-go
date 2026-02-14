@@ -1,0 +1,56 @@
+# Example template.yml for Go projects using rhiza-go
+# Place this file at .rhiza/template.yml in your project
+
+# The upstream template repository
+repository: Jebel-Quant/rhiza-go
+
+# Version tag or branch to sync from
+# Using a version tag enables automated updates via Renovate
+ref: v0.1.0
+
+# File patterns to include from the template
+# Use glob patterns to match multiple files
+include: |
+  # Core configuration files
+  .go-version
+  .golangci.yml
+  .editorconfig
+  .gitignore
+  
+  # Makefile and build system
+  Makefile
+  .rhiza/rhiza.mk
+  .rhiza/make.d/*.mk
+  
+  # CI/CD workflows
+  .github/workflows/go_ci.yml
+  .github/workflows/go_release.yml
+  
+  # Pre-commit hooks
+  .pre-commit-config.yaml
+  
+  # Documentation templates
+  CODE_OF_CONDUCT.md
+  CONTRIBUTING.md
+
+# File patterns to exclude from sync
+# Protects your customizations
+exclude: |
+  # Protect custom scripts
+  .rhiza/scripts/custom/*
+  
+  # Protect local development files
+  local.mk
+  .env
+  
+  # Protect your actual code
+  cmd/**
+  pkg/**
+  internal/**
+  
+  # Protect your tests
+  *_test.go
+  
+  # Protect Go module files (managed by go mod)
+  go.mod
+  go.sum
