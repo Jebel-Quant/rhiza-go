@@ -400,3 +400,258 @@ This repository could serve as a **gold standard template** for other Python pro
 ---
 
 *This analysis was conducted by thoroughly reviewing the repository structure, code quality, documentation, CI/CD workflows, testing infrastructure, and developer experience. Recommendations are based on industry best practices and modern software engineering standards.*
+
+---
+
+## 2026-02-14 — Analysis Entry
+
+### Summary
+
+This repository (`rhiza-go`) is a **nascent fork/adaptation** of the Python-focused Rhiza template system, apparently intended to provide similar template management capabilities for Go projects. The repository currently contains the **complete Python Rhiza infrastructure** but has not yet been adapted for Go. It exists as a direct clone of `jebel-quant/rhiza` with minimal modifications, making it essentially a Python template repository rather than a Go one.
+
+### Strengths
+
+- **Solid Foundation**: Inherits all the excellent infrastructure from the parent Rhiza project (see 9.0/10 rating above)
+- **Clear Intent**: Repository name (`rhiza-go`) signals purpose clearly
+- **Working Base**: The Python template machinery is fully functional and could serve as a reference implementation
+- **Comprehensive Infrastructure Already Present**:
+  - Modular Makefile system with 15+ modules
+  - 16 GitHub Actions workflows
+  - Bundle system for template organization
+  - Automated sync mechanism
+  - Documentation structure
+  - Dev container configuration
+
+### Weaknesses
+
+- **No Go Adaptation Yet**: Repository is 100% Python-focused despite the `-go` suffix
+  - Still contains `pyproject.toml`, `ruff.toml`, `pytest.ini`, `.python-version`
+  - No `go.mod`, `go.sum`, `.golangci.yml`, or Go-specific tooling
+  - GitHub workflows still reference Python (`.github/workflows/rhiza_ci.yml` uses Python matrix)
+  - Makefile targets still use `uv`, `pytest`, `pdoc` (Python tools)
+- **Misleading Repository Name**: Name suggests Go support that doesn't exist yet
+- **No Roadmap or Documentation**: No indication of:
+  - What Go-specific templates will be provided
+  - Timeline for Go adaptation
+  - Whether this will support Go exclusively or both Python and Go
+  - How Go projects should use this currently
+- **No Go-Specific Content**:
+  - `.rhiza/make.d/` contains only Python-focused modules
+  - `.rhiza/template-bundles.yml` defines only Python bundles
+  - No Go CI workflows (no `go test`, `golangci-lint`, `goreleaser`, etc.)
+  - No Go Dockerfile examples
+  - No Go project structure templates
+- **Unclear Differentiation**: Not clear if this should be:
+  - A language-agnostic rhiza (supporting both Python and Go)
+  - A Go-exclusive fork
+  - A multi-language template repository
+
+### Risks / Technical Debt
+
+1. **Repository Name Confusion** (High Priority)
+   - Users expecting Go templates will find only Python
+   - Could damage trust or cause wasted time
+   - **Recommendation**: Either:
+     - Add prominent README notice: "🚧 Go adaptation in progress. Currently contains Python templates."
+     - Rename to `rhiza-multi` or `rhiza-universal` if planning multi-language support
+     - Rapidly implement Go support to match the name
+
+2. **No Clear Migration Path** (High Priority)
+   - Existing Python content will conflict with Go adaptation
+   - Risk of breaking sync workflows for any early adopters
+   - **Recommendation**: 
+     - Create a `MIGRATION.md` documenting the transition strategy
+     - Version tag before major changes (`v0.0.0-python-baseline`)
+     - Consider branching strategy (e.g., `main` for Go, `python` for original)
+
+3. **Dual-Language Complexity** (Medium Priority)
+   - If supporting both languages, bundle system becomes more complex
+   - Need namespacing (e.g., `templates: [python.core, go.core]`)
+   - **Recommendation**:
+     - Decide early: single-language or multi-language
+     - If multi-language, redesign bundle schema:
+       ```yaml
+       bundles:
+         python:
+           core: {...}
+           tests: {...}
+         go:
+           core: {...}
+           tests: {...}
+       ```
+
+4. **Template Sync Conflicts** (Medium Priority)
+   - `.rhiza/template.yml` doesn't exist in this repo (by design, it's the template source)
+   - But workflows assume it exists (`.github/workflows/rhiza_sync.yml`)
+   - **Recommendation**: 
+     - Skip sync workflow in template repos: `if: ${{ github.repository != 'jebel-quant/rhiza-go' }}`
+     - Add self-validation workflow instead
+
+5. **Documentation Debt** (Medium Priority)
+   - README.md still describes Python tooling exclusively
+   - No mention of Go adaptation plans
+   - **Recommendation**: Update README with:
+     - Current status (Python templates operational, Go pending)
+     - Roadmap with timeline
+     - How to use for Python projects now
+     - How to contribute to Go adaptation
+
+6. **Tooling Assumptions** (Low Priority)
+   - Entire `.rhiza/make.d/` assumes Python ecosystem
+   - Would need parallel Go modules or conditional logic
+   - **Recommendation**: Create `.rhiza/make.d/go/` subdirectory for Go-specific targets
+
+### Score
+
+**Current State: 3/10**
+
+While the underlying infrastructure is excellent (inheriting the 9.0 rating from parent), this repository fails to deliver on its implied promise (Go template support). The score reflects:
+
+- **2 points**: For having a solid, proven foundation (Rhiza architecture)
+- **1 point**: For clear naming that indicates intent
+- **0 points**: For Go adaptation (nonexistent)
+- **-0 points**: Deduction for misleading repository state
+
+**Potential Score (if Go adaptation completed): 8.5/10**
+
+Assuming high-quality Go adaptation similar to the Python templates, this could achieve 8.5/10 because:
+- Multi-language support adds complexity (+complexity overhead)
+- Go ecosystem has fewer configuration files than Python (+simpler)
+- Would serve a real need in the Go community (+value)
+
+### Recommendations
+
+#### Immediate (Week 1)
+1. **Update README.md** with prominent notice about current state:
+   ```markdown
+   > ⚠️ **Work in Progress**: This repository is being adapted from Python to Go.
+   > Currently contains Python templates only. Go support coming soon.
+   > For Python projects, use [jebel-quant/rhiza](https://github.com/jebel-quant/rhiza) instead.
+   ```
+
+2. **Create ROADMAP.md**:
+   ```markdown
+   ## Rhiza-Go Roadmap
+   
+   ### Phase 1 (Weeks 1-2): Foundation
+   - [ ] Create Go-specific bundles (core, github, tests)
+   - [ ] Replace pyproject.toml → go.mod examples
+   - [ ] Replace ruff → golangci-lint configs
+   
+   ### Phase 2 (Weeks 3-4): CI/CD
+   - [ ] Port GitHub workflows to Go (test matrix, lint, release)
+   - [ ] Integrate goreleaser for releases
+   - [ ] Add Go-specific devcontainer
+   
+   ### Phase 3 (Weeks 5-6): Documentation
+   - [ ] Go-specific examples and tutorials
+   - [ ] Migration guide from Python Rhiza
+   - [ ] Comparison: Go vs Python Rhiza features
+   ```
+
+3. **Tag Current State**:
+   ```bash
+   git tag v0.0.0-python-baseline -m "Baseline Python template before Go adaptation"
+   git push --tags
+   ```
+
+#### Short-term (Month 1)
+
+4. **Implement Minimal Go Core Bundle**:
+   - Create `.rhiza/bundles/go/core.yml`
+   - Replace key files:
+     - `pyproject.toml` → `go.mod.template`
+     - `ruff.toml` → `.golangci.yml`
+     - `.python-version` → `.go-version`
+   - Create `.rhiza/make.d/bootstrap.mk`:
+     ```makefile
+     install: pre-install
+         @go mod download
+         @go mod verify
+     ```
+
+5. **Port Essential Workflows**:
+   - `.github/workflows/rhiza_ci.yml` (Go CI workflow)
+   - `.github/workflows/go_lint.yml` (golangci-lint)
+   - `.github/workflows/go_release.yml` (goreleaser)
+
+6. **Add Language Detection**:
+   ```makefile
+   # .rhiza/rhiza.mk
+   LANG := $(shell \
+     if [ -f "go.mod" ]; then echo "go"; \
+     elif [ -f "pyproject.toml" ]; then echo "python"; \
+     else echo "unknown"; fi)
+   
+   ifeq ($(LANG),go)
+     include .rhiza/make.d/go/*.mk
+   else ifeq ($(LANG),python)
+     include .rhiza/make.d/python/*.mk
+   endif
+   ```
+
+#### Medium-term (Quarter 1)
+
+7. **Dual-Language Bundle System**:
+   - Redesign `.rhiza/template-bundles.yml` to support namespacing
+   - Create separate bundle definitions per language
+   - Update `rhiza` CLI to handle language selection
+
+8. **Go Documentation**:
+   - Create `docs/GO.md` explaining Go-specific usage
+   - Add Go examples to README
+   - Create comparison table: Python vs Go template differences
+
+9. **Testing**:
+   - Create test projects using Go templates
+   - Ensure `rhiza init --language=go` works
+   - Validate all Go workflows execute successfully
+
+#### Long-term (Quarter 2+)
+
+10. **Community & Ecosystem**:
+    - Announce Go support in Go forums/communities
+    - Create template showcase (example repos using rhiza-go)
+    - Accept community contributions for Go-specific bundles (e.g., gRPC, Kubernetes operators)
+
+11. **Language Expansion**:
+    - Consider Rust, TypeScript, Java support
+    - Abstract core rhiza machinery to be fully language-agnostic
+    - Create plugin system for language-specific handlers
+
+### Critical Decision Needed
+
+**Should this repository be**:
+
+**Option A: Go-Exclusive**
+- Simplest approach
+- Rename Python version to `rhiza-python`
+- Keep this as pure Go template repo
+- Pros: Clear focus, easier maintenance
+- Cons: Fragments the Rhiza ecosystem
+
+**Option B: Multi-Language (Python + Go)**
+- More ambitious
+- Rename to `rhiza-templates` or `rhiza-universal`
+- Support both languages via namespace bundles
+- Pros: Unified ecosystem, cross-language learnings
+- Cons: Increased complexity, larger maintenance burden
+
+**Option C: Language-Agnostic Core + Language Plugins**
+- Most sophisticated
+- Core rhiza machinery language-neutral
+- Language support as plugins/extensions
+- Pros: Scalable to many languages, clean separation
+- Cons: Requires significant refactoring
+
+**Recommendation**: Start with **Option A** (Go-Exclusive) for speed, then evolve to **Option C** (Plugin Architecture) if demand warrants multi-language support.
+
+### Conclusion
+
+This repository has **enormous potential** but currently delivers **nothing beyond the Python template it inherited**. The name `rhiza-go` creates an expectation that isn't met, which risks user confusion and disappointment.
+
+However, the foundation is solid (9.0/10-rated infrastructure), and the path forward is clear. With focused effort over 4-6 weeks, this could become an 8.5/10 Go template repository that provides the same value to Go developers that Rhiza provides to Python developers.
+
+**Action Required**: Immediate communication about current state + rapid initial Go adaptation to validate the concept. The technical work is straightforward; the strategic decision (single vs. multi-language) is more critical.
+
+**Final Score**: 3/10 (current state) / 8.5/10 (potential with Go adaptation)

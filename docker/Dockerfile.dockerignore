@@ -7,11 +7,17 @@
 **
 
 # but don't ignore those files/folders
-!pyproject.toml
-!uv.lock
+!go.mod
+!go.sum
 !README.md
-!src/
+!cmd/
+!pkg/
+!internal/
 
 # In those folders make sure those files are not included
-**/__pycache__
-**/*.pyc
+**/.git
+**/node_modules
+**/.venv
+**/bin
+**/dist
+**/.cache
