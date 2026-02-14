@@ -50,6 +50,10 @@ export RHIZA_VERSION
 # Go binary
 GO_BIN ?= $(shell command -v go 2>/dev/null || echo "go")
 
+UVX_BIN ?= $(shell command -v uvx 2>/dev/null || echo ${INSTALL_DIR}/uvx)
+export UV_NO_MODIFY_PATH := 1
+export UV_VENV_CLEAR := 1
+
 # Load .rhiza/.env (if present) and export its variables so recipes see them.
 -include .rhiza/.env
 
