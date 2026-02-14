@@ -1,15 +1,14 @@
 #!/bin/sh
 # Release script
-# - Creates a git tag based on the current version in pyproject.toml
+# - Creates a git tag based on the current version in VERSION file
 # - Pushes the tag to remote to trigger the release workflow
 # - Performs checks (branch, upstream status, clean working tree)
 #
 # This script is POSIX-sh compatible and follows the style of other scripts
-# in this repository. It uses uv to read the current version.
+# in this repository. It reads the version from the VERSION file.
 
 set -eu
 
-UV_BIN=${UV_BIN:-./bin/uv}
 DRY_RUN=""
 
 BLUE="\033[36m"
@@ -54,15 +53,9 @@ while [ $# -gt 0 ]; do
   esac
 done
 
-# Check if pyproject.toml exists
-if [ ! -f "pyproject.toml" ]; then
-  printf "%b[ERROR] pyproject.toml not found in current directory%b\n" "$RED" "$RESET"
-  exit 1
-fi
-
-# Check if uv is available
-if [ ! -x "$UV_BIN" ]; then
-  printf "%b[ERROR] uv not found at %s. Run 'make install-uv' first.%b\n" "$RED" "$UV_BIN" "$RESET"
+# Check if VERSION file exists
+if [ ! -f "VERSION" ]; then
+  printf "%b[ERROR] VERSION file not found in current directory%b\n" "$RED" "$RESET"
   exit 1
 fi
 
@@ -109,10 +102,10 @@ prompt_yes_no() {
 
 # Function: Release - create tag and push (with prompts)
 do_release() {
-  # Get the current version from pyproject.toml
-  CURRENT_VERSION=$("$UV_BIN" version --short 2>/dev/null)
+  # Get the current version from VERSION file
+  CURRENT_VERSION=$(cat VERSION | tr -d '[:space:]')
   if [ -z "$CURRENT_VERSION" ]; then
-    printf "%b[ERROR] Could not determine version from pyproject.toml%b\n" "$RED" "$RESET"
+    printf "%b[ERROR] Could not determine version from VERSION file%b\n" "$RED" "$RESET"
     exit 1
   fi
 

@@ -12,16 +12,19 @@ post-release:: ; @:
 
 ##@ Releasing and Versioning
 bump: pre-bump ## bump version
-	@if [ -f "pyproject.toml" ]; then \
-		$(MAKE) install; \
-		PATH="$(abspath ${VENV})/bin:$$PATH" ${UVX_BIN} "rhiza[tools]>=0.8.6" tools bump; \
-		printf "${BLUE}[INFO] Updating uv.lock file...${RESET}\n"; \
-		${UV_BIN} lock; \
+	@if [ -f "VERSION" ]; then \
+		if command -v bump2version >/dev/null 2>&1; then \
+			bump2version --config-file .rhiza/.cfg.toml patch; \
+		else \
+			printf "${RED}[ERROR] bump2version not found. Install with: pip install bump2version${RESET}\n"; \
+			printf "${YELLOW}[INFO] Alternatively, manually edit VERSION file and commit${RESET}\n"; \
+			exit 1; \
+		fi; \
 	else \
-		printf "${YELLOW}[WARN] No pyproject.toml found, skipping bump${RESET}\n"; \
+		printf "${YELLOW}[WARN] No VERSION file found, skipping bump${RESET}\n"; \
 	fi
 	@$(MAKE) post-bump
 
-release: pre-release install-uv ## create tag and push to remote with prompts
-	@UV_BIN="${UV_BIN}" /bin/sh ".rhiza/scripts/release.sh"
+release: pre-release ## create tag and push to remote with prompts
+	@/bin/sh ".rhiza/scripts/release.sh"
 	@$(MAKE) post-release
