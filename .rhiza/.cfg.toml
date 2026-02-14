@@ -1,4 +1,5 @@
 [tool.bumpversion]
+current_version = "0.1.1"
 parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)(?:-(?P<release>[a-z]+)\\.(?P<pre_n>\\d+))?(?:\\+build\\.(?P<build_n>\\d+))?"
 serialize = ["{major}.{minor}.{patch}-{release}.{pre_n}+build.{build_n}", "{major}.{minor}.{patch}+build.{build_n}", "{major}.{minor}.{patch}-{release}.{pre_n}", "{major}.{minor}.{patch}"]
 search = "{current_version}"
@@ -14,7 +15,6 @@ allow_dirty = false
 commit = true
 message = "Chore: bump version {current_version} → {new_version}"
 commit_args = ""
-pre_commit_hooks = ["uv sync", "git add uv.lock"] # Ensure uv.lock is updated
 
 [tool.bumpversion.parts.release]
 optional_value = "prod"
@@ -27,11 +27,9 @@ values = [
 ]
 
 [[tool.bumpversion.files]]
+filename = "VERSION"
+
+[[tool.bumpversion.files]]
 filename = "pyproject.toml"
 search = 'version = "{current_version}"'
 replace = 'version = "{new_version}"'
-
-# [[tool.bumpversion.files]]
-# filename = ".rhiza/template-bundles.yml"
-# search = 'version: "{current_version}"'
-# replace = 'version: "{new_version}"'
