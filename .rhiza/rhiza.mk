@@ -102,10 +102,10 @@ summarise-sync: ## summarise differences created by sync with template repositor
 	fi
 
 rhiza-test: install ## run rhiza's own tests (if any)
-	@if [ -d ".rhiza/tests" ]; then \
+	@if [ -d ".rhiza/tests" ] && find .rhiza/tests -name "*_test.go" | grep -q .; then \
 		$(GO_BIN) test .rhiza/tests/...; \
 	else \
-		printf "${YELLOW}[WARN] No .rhiza/tests directory found, skipping rhiza-tests${RESET}\n"; \
+		printf "${YELLOW}[WARN] No Go tests found in .rhiza/tests directory, skipping rhiza-tests${RESET}\n"; \
 	fi
 
 validate: pre-validate rhiza-test ## validate project structure against template repository as defined in .rhiza/template.yml

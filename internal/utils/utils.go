@@ -1,3 +1,4 @@
+// Package utils provides utility functions for the rhiza-go application.
 package utils
 
 import (

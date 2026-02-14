@@ -32,10 +32,12 @@ lint: install-go ## run golangci-lint
 	@printf "${BLUE}[INFO] Running golangci-lint...${RESET}\n"
 	@if command -v golangci-lint >/dev/null 2>&1; then \
 	  golangci-lint run ./...; \
+	elif [ -x "$(shell go env GOPATH)/bin/golangci-lint" ]; then \
+	  $(shell go env GOPATH)/bin/golangci-lint run ./...; \
 	else \
 	  printf "${YELLOW}[WARN] golangci-lint not found, attempting to install...${RESET}\n"; \
 	  $(GO_BIN) install github.com/golangci/golangci-lint/cmd/golangci-lint@latest; \
-	  golangci-lint run ./...; \
+	  $(shell go env GOPATH)/bin/golangci-lint run ./...; \
 	fi
 
 vet: install-go ## run go vet
