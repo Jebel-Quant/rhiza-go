@@ -1,4 +1,6 @@
 // Package config handles loading and managing configuration for the rhiza-go application.
+//
+// This is starter code — replace or extend it with your own configuration logic.
 package config
 
 import (

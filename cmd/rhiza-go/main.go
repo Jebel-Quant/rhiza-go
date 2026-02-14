@@ -1,3 +1,10 @@
+// Command rhiza-go is a starter application demonstrating the rhiza-go template structure.
+//
+// This is example code — replace it with your own application logic.
+// It shows how to use the standard Go project layout:
+//   - cmd/ for application entry points
+//   - pkg/ for public library packages
+//   - internal/ for private internal packages
 package main
 
 import (
