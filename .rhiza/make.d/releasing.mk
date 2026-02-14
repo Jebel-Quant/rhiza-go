@@ -15,16 +15,7 @@ _DRY_RUN_FLAG := $(if $(DRY_RUN),--dry-run,)
 
 ##@ Releasing and Versioning
 bump: pre-bump ## bump version of the project (supports DRY_RUN=1)
-	@if [ -f "pyproject.toml" ]; then \
-		$(MAKE) install; \
-		PATH="$(abspath ${VENV})/bin:$$PATH" ${UVX_BIN} "rhiza-tools>=0.3.1" bump $(_DRY_RUN_FLAG); \
-		if [ -z "$(DRY_RUN)" ]; then \
-			printf "${BLUE}[INFO] Checking uv.lock file...${RESET}\n"; \
-			${UV_BIN} lock; \
-		fi; \
-	else \
-		printf "${YELLOW}[WARN] No pyproject.toml found, skipping bump${RESET}\n"; \
-	fi
+	${UVX_BIN} "rhiza-tools>=0.3.1" bump $(_DRY_RUN_FLAG);
 	@$(MAKE) post-bump
 
 release: pre-release install-uv ## create tag and push to remote repository triggering release workflow (supports DRY_RUN=1)
