@@ -1,0 +1,4 @@
+[project]
+name = "rhiza-go"
+version = "0.1.0"
+description = "Rhiza template for Go projects"
