@@ -60,6 +60,11 @@ clean: ## Clean project artifacts and stale local branches
 	
 	# Clean Go build cache and test cache
 	@$(GO_BIN) clean -cache -testcache -modcache || true
+
+	# Remove ignored files/directories, but keep .env files, tested with futures project
+	@git clean -d -X -f \
+		-e '!.env' \
+		-e '!.env.*'
 	
 	# Remove build artifacts
 	@rm -rf \
