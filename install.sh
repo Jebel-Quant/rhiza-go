@@ -112,13 +112,12 @@ echo "Installing to $INSTALL_DIR..."
 mkdir -p "$INSTALL_DIR"
 if [ -w "$INSTALL_DIR" ]; then
   mv "$TMP_DIR/$BINARY_NAME" "$INSTALL_DIR/$BINARY_NAME"
+  chmod +x "$INSTALL_DIR/$BINARY_NAME"
 else
   echo "Elevated permissions required for installation to $INSTALL_DIR"
   sudo mv "$TMP_DIR/$BINARY_NAME" "$INSTALL_DIR/$BINARY_NAME"
+  sudo chmod +x "$INSTALL_DIR/$BINARY_NAME"
 fi
-
-# Make executable
-chmod +x "$INSTALL_DIR/$BINARY_NAME"
 
 echo ""
 echo "Successfully installed rhiza-go $VERSION to $INSTALL_DIR/$BINARY_NAME"

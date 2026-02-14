@@ -39,7 +39,9 @@ Alternatively, use PowerShell:
 ```powershell
 # Download and extract to current directory
 $version = (Invoke-WebRequest -Uri "https://api.github.com/repos/Jebel-Quant/rhiza-go/releases/latest" -UseBasicParsing | ConvertFrom-Json).tag_name
-$arch = if ([Environment]::Is64BitOperatingSystem) { "amd64" } else { "386" }
+$arch = if ([System.Environment]::Is64BitOperatingSystem) {
+    if ([System.Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture -eq 'Arm64') { "arm64" } else { "amd64" }
+} else { "386" }
 $url = "https://github.com/Jebel-Quant/rhiza-go/releases/download/$version/rhiza-go_${version}_windows_${arch}.zip"
 Invoke-WebRequest -Uri $url -OutFile "rhiza-go.zip"
 Expand-Archive -Path "rhiza-go.zip" -DestinationPath "." -Force
