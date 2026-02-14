@@ -1,6 +1,6 @@
 # GitHub Actions vs GitLab CI Comparison
 
-This document provides a side-by-side comparison of GitHub Actions and GitLab CI implementations for the rhiza project.
+This document provides a side-by-side comparison of GitHub Actions and GitLab CI implementations for the rhiza-go project.
 
 ## Workflow Mapping
 
@@ -9,11 +9,11 @@ This document provides a side-by-side comparison of GitHub Actions and GitLab CI
 | Main Config | `.github/workflows/*.yml` | `.gitlab-ci.yml` + `.gitlab/workflows/*.yml` | ✅ Complete |
 | CI Testing | `rhiza_ci.yml` | `rhiza_ci.yml` | ✅ Complete |
 | Validation | `rhiza_validate.yml` | `rhiza_validate.yml` | ✅ Complete |
-| Dependencies | `rhiza_deptry.yml` | `rhiza_deptry.yml` | ✅ Complete |
-| Pre-commit | `rhiza_pre-commit.yml` | `rhiza_pre-commit.yml` | ✅ Complete |
+| Formatting | `rhiza_pre-commit.yml` | `rhiza_pre-commit.yml` | ✅ Complete |
 | Documentation | `rhiza_book.yml` | `rhiza_book.yml` | ✅ Complete |
 | Sync | `rhiza_sync.yml` | `rhiza_sync.yml` | ✅ Complete |
 | Release | `rhiza_release.yml` | `rhiza_release.yml` | ✅ Complete |
+| Renovate | `rhiza_renovate.yml` | `rhiza_renovate.yml` | ✅ Complete |
 
 ## Syntax Differences
 
@@ -44,35 +44,17 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Run tests
-        run: pytest tests
+        run: make test
 ```
 
 **GitLab CI:**
 ```yaml
 test:
   stage: test
-  image: python:3.12
+  image: golang:1.23-bookworm
   script:
-    - pytest tests
+    - make test
 ```
-
-### Matrix Strategy
-
-**GitHub Actions:**
-```yaml
-strategy:
-  matrix:
-    python-version: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
-```
-
-**GitLab CI:**
-```yaml
-parallel:
-  matrix:
-    - PYTHON_VERSION: ["3.11", "3.12", "3.13"]
-```
-
-**Note:** GitLab CI has limited dynamic matrix support. Workaround: use child pipelines or iterate in script.
 
 ### Artifacts
 
@@ -100,13 +82,13 @@ jobs:
   test:
     runs-on: ubuntu-latest
     container:
-      image: python:3.12
+      image: golang:1.23-bookworm
 ```
 
 **GitLab CI:**
 ```yaml
 test:
-  image: python:3.12
+  image: golang:1.23-bookworm
 ```
 
 ### Secrets and Variables
@@ -114,27 +96,26 @@ test:
 **GitHub Actions:**
 ```yaml
 env:
-  TOKEN: ${{ secrets.PYPI_TOKEN }}
+  TOKEN: ${{ secrets.PAT_TOKEN }}
   CUSTOM_VAR: ${{ vars.CUSTOM_VAR }}
 ```
 
 **GitLab CI:**
 ```yaml
 script:
-  - echo $PYPI_TOKEN
+  - echo $PAT_TOKEN
   - echo $CUSTOM_VAR
 ```
 
 ## Feature Comparison
 
-### 1. Python Matrix Testing (CI)
+### 1. Go Testing (CI)
 
 | Feature | GitHub Actions | GitLab CI |
 |---------|----------------|-----------|
-| Dynamic matrix | ✅ Full support | ⚠️ Limited (static matrix used) |
-| Parallel execution | ✅ Yes | ✅ Yes |
-| Git LFS | ✅ Yes | ✅ Yes |
-| UV integration | ✅ Yes | ✅ Yes |
+| Go image | ✅ `golang:${GO_VERSION}-bookworm` | ✅ `golang:${GO_VERSION}-bookworm` |
+| Test runner | ✅ `make test` | ✅ `make test` |
+| Dep download | ✅ `go mod download` | ✅ `go mod download` |
 
 ### 2. Documentation (Book)
 
@@ -149,10 +130,10 @@ script:
 
 | Feature | GitHub Actions | GitLab CI |
 |---------|----------------|-----------|
-| PyPI auth | ✅ OIDC Trusted Publishing | ⚠️ Token-based |
+| Build tool | ✅ goreleaser | ✅ goreleaser |
 | Release creation | `softprops/action-gh-release` | GitLab Releases API |
-| Version validation | ✅ Yes | ✅ Yes |
-| Draft releases | ✅ Yes | ✅ Yes (via API) |
+| Version validation | ✅ VERSION file | ✅ VERSION file |
+| SBOM generation | ✅ syft | ✅ syft |
 
 ### 4. Sync
 
@@ -167,10 +148,9 @@ script:
 
 ### GitHub Actions Only
 
-1. **OIDC Authentication:** Passwordless authentication with PyPI and cloud providers
-2. **Action Marketplace:** Reusable actions from the community
-3. **Job summaries:** Rich markdown summaries in the UI
-4. **Environments:** Built-in environment protection rules
+1. **Action Marketplace:** Reusable actions from the community
+2. **Job summaries:** Rich markdown summaries in the UI
+3. **Environments:** Built-in environment protection rules
 
 ### GitLab CI Only
 
@@ -189,12 +169,10 @@ script:
 - ✅ Scheduled pipelines
 
 ### Moderate Effort
-- ⚠️ Dynamic matrix strategies (use child pipelines)
 - ⚠️ Marketplace actions (reimplement with scripts)
 - ⚠️ Complex conditionals (restructure with rules)
 
 ### Challenging Migrations
-- ❌ OIDC-based authentication (use tokens)
 - ❌ GitHub-specific APIs (use GitLab APIs)
 - ❌ GitHub Apps (use GitLab integrations)
 
@@ -202,13 +180,13 @@ script:
 
 | Workflow | YAML Valid | Logic Verified | Notes |
 |----------|------------|----------------|-------|
-| CI | ✅ | ⏳ | Needs test with actual Python matrix |
-| Validate | ✅ | ⏳ | Skips in rhiza repo |
-| Deptry | ✅ | ⏳ | Needs test with dependencies |
-| Pre-commit | ✅ | ⏳ | Needs test with hooks |
+| CI | ✅ | ⏳ | Go testing with make test |
+| Validate | ✅ | ⏳ | Skips in rhiza-go repo |
+| Formatting | ✅ | ⏳ | Go formatting and linting |
 | Book | ✅ | ⏳ | Needs GitLab Pages setup |
 | Sync | ✅ | ⏳ | Needs PAT_TOKEN |
-| Release | ✅ | ⏳ | Needs PYPI_TOKEN |
+| Release | ✅ | ⏳ | goreleaser + syft |
+| Renovate | ✅ | ⏳ | Needs RENOVATE_TOKEN |
 
 Legend:
 - ✅ Complete
@@ -239,18 +217,16 @@ Legend:
 
 - **GitHub Actions Docs:** https://docs.github.com/en/actions
 - **GitLab CI Docs:** https://docs.gitlab.com/ee/ci/
-- **Rhiza GitHub:** https://github.com/jebel-quant/rhiza
+- **Rhiza-Go GitHub:** https://github.com/jebel-quant/rhiza-go
 - **Migration Guide:** `.gitlab/README.md`
 - **Testing Guide:** `.gitlab/TESTING.md`
 
 ## Summary
 
-Most GitHub Actions workflows (7 of 10) have been converted to GitLab CI with equivalent functionality. The main differences are:
+Most GitHub Actions workflows have been converted to GitLab CI with equivalent functionality. The main differences are:
 
 1. **Syntax:** Different trigger and job definitions
-2. **Authentication:** Token-based instead of OIDC
-3. **Matrix:** Static instead of dynamic
-4. **Pages:** Different output directory requirements
-5. **APIs:** Platform-specific endpoints
+2. **Pages:** Different output directory requirements
+3. **APIs:** Platform-specific endpoints
 
-Both platforms are fully supported and provide equivalent functionality for the rhiza project.
+Both platforms are fully supported and provide equivalent functionality for the rhiza-go project.

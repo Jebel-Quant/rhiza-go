@@ -1,23 +1,26 @@
-# This file is part of the jebel-quant/rhiza repository
-# (https://github.com/jebel-quant/rhiza).
+# This file is part of the jebel-quant/rhiza-go repository
+# (https://github.com/jebel-quant/rhiza-go).
 #
-# Workflow: Pre-commit (GitLab CI)
+# Workflow: Formatting & Linting (GitLab CI)
 #
-# Purpose: This workflow runs pre-commit checks to ensure code quality
-#          and consistency across the codebase. It helps catch issues
-#          like formatting errors, linting issues, and other code quality
-#          problems before they are merged.
+# Purpose: This workflow runs Go formatting and linting checks to ensure
+#          code quality and consistency across the codebase.
 #
 # Trigger: This workflow runs on every push and on merge requests to main/master
 #          branches (including from forks)
 #
 # Components:
-#   - 🔍 Run pre-commit checks using reusable action
+#   - 🔍 Run Go formatting and linting checks
 
-pre-commit:check:
+variables:
+  GO_VERSION: "1.23"
+
+fmt:check:
   stage: test
   needs: []
-  image: ghcr.io/astral-sh/uv:0.9.30-bookworm
+  image: golang:${GO_VERSION}-bookworm
+  before_script:
+    - go mod download
   script:
     - make fmt
   rules:

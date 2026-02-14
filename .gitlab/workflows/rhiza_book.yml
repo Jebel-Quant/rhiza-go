@@ -1,30 +1,28 @@
-# This file is part of the jebel-quant/rhiza repository
-# (https://github.com/jebel-quant/rhiza).
+# This file is part of the jebel-quant/rhiza-go repository
+# (https://github.com/jebel-quant/rhiza-go).
 #
 # Workflow: Book (GitLab CI)
 #
-# Purpose: This workflow builds and deploys comprehensive documentation for the project.
-#          It combines API documentation, test coverage reports, test results, and
-#          interactive notebooks into a single GitLab Pages site.
+# Purpose: This workflow builds and deploys Go documentation for the project.
+#          It generates godoc API documentation and coverage reports,
+#          then deploys them as a GitLab Pages site.
 #
 # Trigger: This workflow runs on every push to the main or master branch
 #
 # Components:
-#   - 📓 Process Marimo notebooks
-#   - 📖 Generate API documentation with pdoc
-#   - 🧪 Run tests and generate coverage reports
+#   - 📖 Generate Go documentation with godoc
+#   - 🧪 Generate coverage reports
 #   - 🚀 Deploy combined documentation to GitLab Pages
+
+variables:
+  GO_VERSION: "1.23"
 
 pages:
   stage: deploy
   needs: []
-  image: ghcr.io/astral-sh/uv:0.9.30-bookworm
-  variables:
-    GIT_LFS_SKIP_SMUDGE: "0"
+  image: golang:${GO_VERSION}-bookworm
   before_script:
-    - apt-get update && apt-get install -y git-lfs make
-    - git lfs pull
-    - export UV_EXTRA_INDEX_URL="${UV_EXTRA_INDEX_URL}"
+    - go mod download
   script:
     - |
       # Check if PUBLISH_COMPANION_BOOK is set (defaults to allowing deployment)
@@ -33,14 +31,12 @@ pages:
         exit 0
       fi
 
-      # Build the book
+      # Build the book (godoc + coverage)
       make book
 
       # GitLab Pages expects artifacts in the "public" directory
-      # Move _book to public for GitLab Pages
       mv _book public
 
-      # Create .nojekyll file if not present
       touch public/.nojekyll
   artifacts:
     paths:
