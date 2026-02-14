@@ -25,8 +25,7 @@ func Load() (*Config, error) {
 
 	// Try to read .go-version file
 	goVersionPath := filepath.Join(".", ".go-version")
-	//nolint:gosec // Reading version file from project root is safe
-	if data, err := os.ReadFile(goVersionPath); err == nil {
+	if data, err := os.ReadFile(goVersionPath); err == nil { //nolint:gosec // #nosec G304 -- Reading version file from project root is safe
 		cfg.GoVersion = strings.TrimSpace(string(data))
 	}
 
@@ -43,8 +42,7 @@ type Template struct {
 
 // LoadTemplate reads template configuration from .rhiza/template.yml
 func LoadTemplate(path string) (*Template, error) {
-	//nolint:gosec // Reading template file from specified path is intended
-	data, err := os.ReadFile(path)
+	data, err := os.ReadFile(path) //nolint:gosec // #nosec G304 -- Reading template file from specified path is intended
 	if err != nil {
 		return nil, fmt.Errorf("failed to read template file: %w", err)
 	}

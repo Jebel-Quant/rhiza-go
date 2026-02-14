@@ -27,8 +27,7 @@ type bundleDetails struct {
 func loadBundles(t *testing.T) *bundleConfig {
 	t.Helper()
 	bundlePath := repoPath(".rhiza/template-bundles.yml")
-	//nolint:gosec // Reading template bundles file is intended
-	data, err := os.ReadFile(bundlePath)
+	data, err := os.ReadFile(bundlePath) //nolint:gosec // #nosec G304 -- Reading template bundles file is intended
 	if err != nil {
 		t.Fatalf("failed to read template-bundles.yml: %v", err)
 	}
