@@ -5,18 +5,12 @@ package utils
 
 import (
 	"path/filepath"
-	"strings"
 )
 
-// SanitizePath sanitizes a file path by removing dangerous characters
+// SanitizePath sanitizes a file path by normalizing it
 func SanitizePath(path string) string {
 	// Clean the path to normalize it
-	path = filepath.Clean(path)
-	// Remove any remaining .. sequences after cleaning
-	path = strings.ReplaceAll(path, "..", "")
-	// Clean up any duplicate slashes that may result
-	path = filepath.Clean(path)
-	return path
+	return filepath.Clean(path)
 }
 
 // Contains checks if a string slice contains a specific string
