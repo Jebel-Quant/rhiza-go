@@ -21,6 +21,7 @@ func TestMakefileTargetsExist(t *testing.T) {
 		"sync",
 		"bump",
 		"release",
+		"security",
 	}
 
 	// Get all available targets using make -pn

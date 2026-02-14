@@ -27,8 +27,7 @@ type bundleDetails struct {
 func loadBundles(t *testing.T) *bundleConfig {
 	t.Helper()
 	bundlePath := repoPath(".rhiza/template-bundles.yml")
-	//nolint:gosec // Reading template bundles file is intended
-	data, err := os.ReadFile(bundlePath)
+	data, err := os.ReadFile(bundlePath) //nolint:gosec // #nosec G304 -- Reading template bundles file is intended
 	if err != nil {
 		t.Fatalf("failed to read template-bundles.yml: %v", err)
 	}
@@ -85,7 +84,6 @@ func TestBundleFilesExist(t *testing.T) {
 	// These are referenced in bundle definitions but not yet created.
 	knownMissing := map[string]string{
 		"tests/benchmarks":                       "benchmark directory planned for future",
-		".github/workflows/rhiza_security.yml":   "security workflow planned for Phase 6",
 		".github/workflows/rhiza_benchmarks.yml": "benchmark workflow planned for future",
 		".rhiza/make.d/presentation.mk":          "presentation make targets not yet created",
 		".github/workflows/rhiza_book.yml":       "book workflow planned for future",

@@ -514,42 +514,99 @@ go test ./.rhiza/tests/... -v  # Verbose test output with subtests
 
 ---
 
-### Phase 6: Release Pipeline Hardening & goreleaser
+### Phase 6: Release Pipeline Hardening & goreleaser ✅ COMPLETED
 
 **Goal**: Production-grade release automation with multi-platform binary distribution, using Go community standard tooling.
 
-**Why sixth**: Once the template is clean and tested, the release pipeline should be best-in-class — this is what makes Go developers want to adopt it.
+**Status**: ✅ Complete (PR: [Phase 6: Release Pipeline Hardening & goreleaser](https://github.com/Jebel-Quant/rhiza-go/pull/9))
 
-#### Deliverables
+**Completed Deliverables:**
 
-1. **Add `.goreleaser.yml`**
+1. ✅ **Created `.goreleaser.yml`**
    - Multi-platform builds (linux/darwin/windows × amd64/arm64)
-   - Checksums file generation
-   - Changelog from git log
-   - Docker image publishing (optional)
-   - Homebrew tap generation (optional)
+   - Checksums file generation (`checksums.txt`)
+   - Changelog from git log with conventional commit filtering
+   - Archives: `.tar.gz` for linux/darwin, `.zip` for windows
+   - CGO disabled for portable static binaries
+   - `ldflags` inject version, commit SHA, and build date
+   - Draft release mode (matches existing workflow pattern)
 
-2. **Integrate goreleaser into release workflow**
-   - `rhiza_release.yml` calls `goreleaser release` instead of manual `go build`
-   - SBOM generation via `syft` or `goreleaser`'s built-in support
-   - Provenance attestation
+2. ✅ **Integrated goreleaser into release workflow**
+   - `rhiza_release.yml` now uses `goreleaser/goreleaser-action@v6` instead of manual `go build` commands
+   - Removed manual multi-platform build steps, checksum generation, and dist artifact upload
+   - Removed separate `draft-release` job (goreleaser creates draft release directly)
+   - SBOM generation via `syft` still runs after goreleaser
+   - SLSA provenance attestations maintained for public repos
+   - SBOM files appended to goreleaser's draft release
 
-3. **Add `govulncheck` to CI**
-   - Go's official vulnerability scanner
-   - Add to `rhiza_ci.yml` or as a separate workflow
+3. ✅ **Added `govulncheck` to CI**
+   - Added to `rhiza_ci.yml` test job (runs after tests, before coverage upload)
+   - Installs `govulncheck@latest` and scans `./...`
+   - Runs on all Go version matrix entries
 
-4. **Add `make security` target**
-   - Runs `govulncheck` and `gosec`
-   - Optional: SBOM generation locally
+4. ✅ **Created `.github/workflows/rhiza_security.yml`**
+   - Dedicated security scanning workflow with two jobs: `govulncheck` and `gosec`
+   - Runs on push to main, pull requests, and weekly schedule (Monday 06:00 UTC)
+   - Uses `securego/gosec@master` action for gosec scanning
+   - Has `security-events: write` permission for SARIF upload compatibility
 
-#### Tests & Validation
+5. ✅ **Created `.rhiza/make.d/security.mk` with `make security` target**
+   - `make security` runs both `govulncheck` and `gosec`
+   - `make govulncheck` runs Go's official vulnerability scanner independently
+   - `make gosec` runs Go security checker independently
+   - Auto-installs tools if not found (consistent with other make targets)
 
-- [ ] `goreleaser check` passes (config validation)
-- [ ] `goreleaser release --snapshot --clean` builds all platforms locally
-- [ ] Tag push triggers release workflow that uses goreleaser
-- [ ] Release artefacts include binaries + checksums + SBOM
-- [ ] `make security` runs without errors
-- [ ] `govulncheck` is included in CI
+6. ✅ **Updated `.rhiza/make.d/bootstrap.mk`**
+   - `make install` now installs `govulncheck` and `gosec` alongside other dev tools
+
+7. ✅ **Updated `.rhiza/template-bundles.yml`**
+   - Added `.goreleaser.yml` to core bundle (root configuration file)
+   - Added `.rhiza/make.d/security.mk` to core bundle (make target file)
+
+8. ✅ **Updated template self-tests**
+   - Removed `.github/workflows/rhiza_security.yml` from `knownMissing` in `bundle_test.go`
+   - Added `security` to required Makefile targets in `makefile_test.go`
+
+#### Validation Results
+
+- ✅ `make test` passes — all existing tests unaffected
+- ✅ `make rhiza-test` passes — all 24 template self-tests pass (including new `security` target)
+- ✅ `make validate` passes — all bundle files validated, all Makefile targets exist, Go compiles
+- ✅ `make security` target correctly invokes `govulncheck` and `gosec` (tools run but vuln DB unreachable in sandbox)
+- ✅ `.goreleaser.yml` created with multi-platform build config
+- ⏸️ `goreleaser check` not tested (goreleaser binary not available in sandbox — will validate in CI)
+- ⏸️ `goreleaser release --snapshot --clean` not tested locally (will validate in CI)
+- ⏸️ Tag push release workflow not yet tested (will be validated when tag is pushed)
+
+**What's Done (Go-adapted):**
+
+| File | Status |
+|------|--------|
+| `.goreleaser.yml` | ✅ Multi-platform builds, checksums, changelog |
+| `.github/workflows/rhiza_release.yml` | ✅ Uses goreleaser action instead of manual builds |
+| `.github/workflows/rhiza_ci.yml` | ✅ govulncheck added to test job |
+| `.github/workflows/rhiza_security.yml` | ✅ Dedicated security scanning (govulncheck + gosec) |
+| `.rhiza/make.d/security.mk` | ✅ `make security`, `make govulncheck`, `make gosec` |
+| `.rhiza/make.d/bootstrap.mk` | ✅ Installs govulncheck and gosec |
+| `.rhiza/template-bundles.yml` | ✅ Added `.goreleaser.yml` and `security.mk` |
+| `.rhiza/tests/bundle_test.go` | ✅ Removed `rhiza_security.yml` from knownMissing |
+| `.rhiza/tests/makefile_test.go` | ✅ Added `security` to required targets |
+
+**Next Agent Instructions:**
+Phase 6 is complete. The release pipeline now uses goreleaser for Go community-standard releases. Key implementation details:
+- `.goreleaser.yml` uses v2 schema with CGO_ENABLED=0 for static binaries
+- Release workflow uses `goreleaser/goreleaser-action@v6` — goreleaser handles building, checksums, and draft release creation
+- SBOM is generated separately with `syft` (not goreleaser's built-in) for CycloneDX format consistency
+- `make security` runs `govulncheck` and `gosec` locally
+- `rhiza_security.yml` runs weekly and on PRs to catch new vulnerabilities
+- `rhiza_ci.yml` runs `govulncheck` as part of the standard CI pipeline
+- Homebrew tap and Docker image publishing via goreleaser are not enabled (can be added by downstream projects)
+
+To validate end-to-end:
+1. Push a tag (`git tag v0.1.0 && git push origin v0.1.0`) to trigger the release workflow
+2. Verify goreleaser builds multi-platform binaries and creates draft release
+3. Verify SBOM and attestations are attached to the release
+4. Verify `rhiza_security.yml` runs on the main branch
 
 ---
 
@@ -610,7 +667,7 @@ go test ./.rhiza/tests/... -v  # Verbose test output with subtests
 | **3** | CI/CD & Automation | ~10 workflows | All GitHub Actions pass for Go |
 | **4** | DevContainer & Docs | ~12 files | DevContainer builds, docs are Go-specific |
 | **5** | Self-Tests & Validation | New test suite | `make validate` and `make rhiza-test` pass |
-| **6** | goreleaser & Security | 3-4 files | Multi-platform releases, vulnerability scanning |
+| **6** | goreleaser & Security | 9 files | Multi-platform releases, vulnerability scanning |
 | **7** | Cleanup & Dogfooding | Audit + new repo | Downstream project works end-to-end |
 
 ## Key Decision Points

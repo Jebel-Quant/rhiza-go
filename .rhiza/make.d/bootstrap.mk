@@ -50,6 +50,8 @@ install: pre-install install-go ## install Go dependencies
 	@printf "${BLUE}[INFO] Installing development tools...${RESET}\n"
 	@$(GO_BIN) install github.com/golangci/golangci-lint/cmd/golangci-lint@latest || true
 	@$(GO_BIN) install golang.org/x/tools/cmd/goimports@latest || true
+	@$(GO_BIN) install golang.org/x/vuln/cmd/govulncheck@latest || true
+	@$(GO_BIN) install github.com/securego/gosec/v2/cmd/gosec@latest || true
 	
 	@$(MAKE) post-install
 
