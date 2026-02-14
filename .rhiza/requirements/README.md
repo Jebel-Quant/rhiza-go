@@ -1,27 +1,31 @@
 # Requirements Folder
 
-This folder contains the development dependencies for the Rhiza project, organized by purpose.
+This folder is reserved for future use. In the Go adaptation of Rhiza, dependencies
+are managed through `go.mod` and `go.sum` at the project root.
 
-## Files
+## Go Dependency Management
 
-- **tests.txt** - Testing dependencies (pytest, pytest-cov, pytest-html)
-- **marimo.txt** - Marimo notebook dependencies
-- **docs.txt** - Documentation generation dependencies (pdoc)
-- **tools.txt** - Development tools (pre-commit, python-dotenv)
-
-## Usage
-
-These requirements files are automatically installed by the `make install` command.
-
-To install specific requirement files manually:
+Go modules handle all dependency management:
 
 ```bash
-uv pip install -r .rhiza/requirements/tests.txt
-uv pip install -r .rhiza/requirements/marimo.txt
-uv pip install -r .rhiza/requirements/docs.txt
-uv pip install -r .rhiza/requirements/tools.txt
+# Download dependencies
+go mod download
+
+# Add a new dependency
+go get github.com/example/package
+
+# Tidy dependencies
+go mod tidy
 ```
+
+## Development Tools
+
+Development tools are installed via `make install`:
+
+- `golangci-lint` — Linting
+- `goimports` — Import formatting
+- `godoc` — Documentation server
 
 ## CI/CD
 
-GitHub Actions workflows automatically install these requirements as needed.
+GitHub Actions workflows use `go mod download` to install dependencies.

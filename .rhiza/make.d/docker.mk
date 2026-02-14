@@ -13,10 +13,10 @@ docker-build: ## build Docker image
 	@if [ ! -f "${DOCKER_FOLDER}/Dockerfile" ]; then \
 	  printf "${YELLOW}[WARN] No ${DOCKER_FOLDER}/Dockerfile found, skipping build${RESET}\n"; \
 	else \
-	  printf "${BLUE}[INFO] Building Docker image with Python ${PYTHON_VERSION}${RESET}\n"; \
+	  printf "${BLUE}[INFO] Building Docker image with Go ${GO_VERSION}${RESET}\n"; \
 	  docker buildx build \
 	    --file ${DOCKER_FOLDER}/Dockerfile \
-	    --build-arg PYTHON_VERSION=${PYTHON_VERSION} \
+	    --build-arg GO_VERSION=${GO_VERSION} \
 	    --tag ${DOCKER_IMAGE_NAME}:latest \
 	    --load \
 	    .; \
