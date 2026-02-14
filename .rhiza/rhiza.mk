@@ -103,16 +103,29 @@ summarise-sync: ## summarise differences created by sync with template repositor
 
 rhiza-test: install ## run rhiza's own tests (if any)
 	@if [ -d ".rhiza/tests" ] && find .rhiza/tests -name "*_test.go" | grep -q .; then \
-		$(GO_BIN) test .rhiza/tests/...; \
+		$(GO_BIN) test ./.rhiza/tests/...; \
 	else \
 		printf "${YELLOW}[WARN] No Go tests found in .rhiza/tests directory, skipping rhiza-tests${RESET}\n"; \
 	fi
 
 validate: pre-validate rhiza-test ## validate project structure against template repository as defined in .rhiza/template.yml
+	@printf "${BLUE}[INFO] Running local template validation...${RESET}\n"
+	@# Check all bundled files exist
+	@$(GO_BIN) test ./.rhiza/tests/... -run TestBundleFilesExist -count=1 > /dev/null 2>&1 && \
+		printf "${GREEN}[PASS] All bundle files validated${RESET}\n" || \
+		printf "${RED}[FAIL] Some bundle files are missing${RESET}\n"
+	@# Check Makefile targets resolve
+	@$(GO_BIN) test ./.rhiza/tests/... -run TestMakefileTargetsExist -count=1 > /dev/null 2>&1 && \
+		printf "${GREEN}[PASS] All required Makefile targets exist${RESET}\n" || \
+		printf "${RED}[FAIL] Some Makefile targets are missing${RESET}\n"
+	@# Check Go code compiles
+	@$(GO_BIN) build ./... > /dev/null 2>&1 && \
+		printf "${GREEN}[PASS] Go code compiles successfully${RESET}\n" || \
+		printf "${RED}[FAIL] Go code compilation failed${RESET}\n"
 	@if git remote get-url origin 2>/dev/null | grep -iqE 'jebel-quant/rhiza-go(\.git)?$$'; then \
-		printf "${BLUE}[INFO] Skipping validate in rhiza-go repository (no template.yml by design)${RESET}\n"; \
+		printf "${BLUE}[INFO] Skipping remote validation in rhiza-go repository (no template.yml by design)${RESET}\n"; \
 	else \
-		printf "${YELLOW}[WARN] Validate functionality requires rhiza CLI tool${RESET}\n"; \
+		printf "${YELLOW}[WARN] Remote validation requires rhiza CLI tool${RESET}\n"; \
 	fi
 	@$(MAKE) post-validate
 
