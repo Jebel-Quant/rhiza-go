@@ -31,10 +31,15 @@ jobs:
 
       - name: Validate Rhiza config
         # don't run this in rhiza itself. Rhiza has no template.yml file.
+        # don't run for Go projects that have no pyproject.toml
         if: ${{ github.repository != 'jebel-quant/rhiza' }}
         shell: bash
         run: |
-          uvx "rhiza>=0.8.0" validate .
+          if [ -f "pyproject.toml" ]; then
+            uvx "rhiza>=0.8.0" validate .
+          else
+            echo "Skipping Python-specific validation (no pyproject.toml found)"
+          fi
         
       - name: Run Rhiza Tests
         shell: bash
