@@ -3,25 +3,29 @@ set -euo pipefail
 
 # Session Start Hook
 # Validates that the environment is correctly set up before the agent begins work.
-# The virtual environment should already be activated via copilot-setup-steps.yml.
+# Go should already be available via copilot-setup-steps.yml.
 
 echo "[copilot-hook] Validating environment..."
 
-# Verify uv is available
-if ! command -v uv >/dev/null 2>&1 && [ ! -x "./bin/uv" ]; then
-    echo "[copilot-hook] ERROR: uv not found. Run 'make install' to set up the environment."
+# Verify Go is available
+if ! command -v go >/dev/null 2>&1; then
+    echo "[copilot-hook] ERROR: go not found. Run 'make install' to set up the environment."
     exit 1
 fi
 
-# Verify virtual environment exists
-if [ ! -d ".venv" ]; then
-    echo "[copilot-hook] ERROR: .venv not found. Run 'make install' to set up the environment."
-    exit 1
+# Verify Go version matches .go-version
+if [ -f ".go-version" ]; then
+    EXPECTED_VERSION=$(cat .go-version | tr -d '[:space:]')
+    INSTALLED_VERSION=$(go version | grep -oP '\d+\.\d+' | head -1)
+    if [ "$INSTALLED_VERSION" != "$EXPECTED_VERSION" ]; then
+        echo "[copilot-hook] WARNING: Go version mismatch: installed=${INSTALLED_VERSION}, expected=${EXPECTED_VERSION}"
+    fi
 fi
 
-# Verify virtual environment is on PATH (activated via copilot-setup-steps.yml)
-if ! command -v python >/dev/null 2>&1 || [[ "$(command -v python)" != *".venv"* ]]; then
-    echo "[copilot-hook] WARNING: .venv/bin is not on PATH. The agent may not use the correct Python."
+# Verify go.mod exists (valid Go project)
+if [ ! -f "go.mod" ]; then
+    echo "[copilot-hook] ERROR: go.mod not found. This does not appear to be a Go project."
+    exit 1
 fi
 
 echo "[copilot-hook] Environment validated successfully."

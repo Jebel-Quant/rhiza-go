@@ -1,5 +1,5 @@
-# This file is part of the jebel-quant/rhiza repository
-# (https://github.com/jebel-quant/rhiza).
+# This file is part of the jebel-quant/rhiza-go repository
+# (https://github.com/jebel-quant/rhiza-go).
 #
 # Workflow: Copilot Setup Steps
 #
@@ -31,10 +31,10 @@ jobs:
         with:
           lfs: true
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7.3.0
+      - name: Set up Go
+        uses: actions/setup-go@v5
         with:
-          version: "0.10.2"
+          go-version-file: .go-version
 
       - name: Configure git auth for private packages
         uses: ./.github/actions/configure-git-auth
@@ -42,9 +42,7 @@ jobs:
           token: ${{ secrets.GH_PAT }}
 
       - name: Install dependencies
-        env:
-          UV_EXTRA_INDEX_URL: ${{ secrets.UV_EXTRA_INDEX_URL }}
         run: make install
 
-      - name: Activate virtual environment
-        run: echo "${{ github.workspace }}/.venv/bin" >> "$GITHUB_PATH"
+      - name: Add GOPATH/bin to PATH
+        run: echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
