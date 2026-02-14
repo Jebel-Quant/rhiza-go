@@ -9,7 +9,7 @@
     ":pinDevDependencies"
   ],
   "enabledManagers": [
-    "pep621",
+    "gomod",
     "pre-commit",
     "github-actions",
     "gitlabci",
@@ -24,10 +24,10 @@
   "packageRules": [
     {
       "matchManagers": [
-        "pep621"
+        "gomod"
       ],
       "matchPackageNames": [
-        "python"
+        "go"
       ],
       "enabled": false
     },

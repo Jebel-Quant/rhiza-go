@@ -21,7 +21,8 @@ on:
 
 jobs:
   sync:
-    if: ${{ github.repository != 'jebel-quant/rhiza' }}
+    # Skip for template repositories (both Python rhiza and Go rhiza-go)
+    if: ${{ github.repository != 'jebel-quant/rhiza' && github.repository != 'jebel-quant/rhiza-go' }}
     runs-on: ubuntu-latest
 
     steps:

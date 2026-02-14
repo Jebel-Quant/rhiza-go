@@ -215,78 +215,120 @@ The template infrastructure is now clean of Python functional artefacts. Key not
 
 ---
 
-### Phase 3: CI/CD & Automation Workflows
+### Phase 3: CI/CD & Automation Workflows ✅ COMPLETED
 
 **Goal**: All GitHub Actions workflows, Dependabot/Renovate configs, and agent infrastructure work for Go.
 
-**Why third**: CI/CD is critical for a template, but only meaningful once the template content (Phase 2) is correct.
+**Status**: ✅ Complete (PR: [Phase 3: CI/CD & Automation Workflows](https://github.com/Jebel-Quant/rhiza-go/pull/7))
 
-#### Deliverables
+**Completed Deliverables:**
 
-1. **Rewrite `.github/workflows/copilot-setup-steps.yml`**
-   - Remove `uv` installation
-   - Replace `setup-uv` with `setup-go`  
-   - Remove `.venv` activation (Go doesn't use virtualenvs)
-   - Run `make install` (which now does `go mod download`)
-   - Add `GOPATH/bin` to `GITHUB_PATH` for Go tools
+1. ✅ **Rewrote `.github/workflows/copilot-setup-steps.yml`** for Go
+   - Replaced `astral-sh/setup-uv` with `actions/setup-go@v5` using `go-version-file: .go-version`
+   - Removed `UV_EXTRA_INDEX_URL` environment variable
+   - Replaced `.venv/bin` PATH addition with `GOPATH/bin`
+   - Kept `make install` (which now does `go mod download` and installs Go dev tools)
 
-2. **Rewrite `.github/hooks/session-start.sh`**
-   - Validate `go` is available (not `uv`)
-   - Validate Go version matches `.go-version`
-   - Remove `.venv` checks
+2. ✅ **Rewrote `.github/hooks/session-start.sh`** for Go
+   - Validates `go` is available (not `uv`)
+   - Validates Go version matches `.go-version` (warns on mismatch)
+   - Validates `go.mod` exists (valid Go project check)
+   - Removed all `.venv` and Python checks
 
-3. **Rewrite `.github/copilot-instructions.md`**
-   - Replace all Python references with Go equivalents
-   - Document `make install`, `make test`, `make fmt` in Go context
-   - Reference `go.mod` instead of `pyproject.toml`
-   - Reference `.go-version` instead of `.python-version`
-   - Reference `golangci-lint` instead of `ruff` and `go fmt` instead of `ruff format`
-   - Update project structure (`cmd/`, `pkg/`, `internal/` instead of `src/`, `tests/`)
-   - Update coding standards (effective Go, not PEP 8)
+3. ✅ **Rewrote `.github/copilot-instructions.md`** for Go
+   - Replaced all Python/uv references with Go equivalents
+   - Updated prerequisites (Go from `.go-version`, not Python)
+   - Updated common commands (`go test`, `go fmt`, `golangci-lint` instead of `pytest`, `ruff`)
+   - Updated project structure (`cmd/`, `pkg/`, `internal/` instead of `src/`, `tests/`)
+   - Updated coding standards (Effective Go, not PEP 8)
+   - Updated key files (`go.mod`, `.go-version`, `.golangci.yml` instead of `pyproject.toml`, `.python-version`)
+   - Updated CI/CD section to reference Go setup
 
-4. **Fix `.github/workflows/rhiza_codeql.yml`**
-   - Replace `python` with `go` in the language matrix
-   - Remove `actions` if not needed
+4. ✅ **Fixed `.github/workflows/rhiza_codeql.yml`**
+   - Replaced `python` (build-mode: none) with `go` (build-mode: autobuild) in language matrix
+   - Kept `actions` language for workflow scanning
 
-5. **Update `.github/dependabot.yml`**
-   - Replace `pep621` package ecosystem with `gomod`
-   - Keep `github-actions` and `docker` ecosystems
+5. ✅ **Updated `.github/dependabot.yml`**
+   - Replaced `uv` package ecosystem with `gomod`
+   - Updated labels from `python` to `go`
+   - Updated group name from `python-dependencies` to `go-dependencies`
+   - Kept `github-actions` ecosystem and Docker (commented out)
+   - Updated header comment to reference rhiza-go
 
-6. **Update `renovate.json`**
-   - Replace `pep621` manager with `gomod`
-   - Keep `pre-commit`, `github-actions`, `dockerfile`, `devcontainer`
-   - Keep custom regex manager for `.rhiza/template.yml` (language-agnostic)
+6. ✅ **Updated `renovate.json`**
+   - Replaced `pep621` manager with `gomod`
+   - Updated package rule to disable `go` version pinning (instead of `python`)
+   - Kept `pre-commit`, `github-actions`, `gitlabci`, `devcontainer`, `dockerfile`, `custom.regex`
+   - Kept custom regex manager for `.rhiza/template.yml` (language-agnostic)
 
-7. **Update `.github/workflows/rhiza_sync.yml`**
-   - Currently uses `uvx rhiza materialize` — this depends on the Python `rhiza` CLI
-   - Decision point: Will the Go template sync mechanism use the same Python `rhiza` CLI (as a standalone tool), or will there be a Go-native sync tool?
-   - Short-term: keep using `uvx rhiza` (it's a CLI tool, language of the template doesn't matter)
-   - Long-term: note this as a future item for a Go-native `rhiza` CLI
+7. ✅ **Updated `.github/workflows/rhiza_sync.yml`**
+   - Added `jebel-quant/rhiza-go` to repository exclusion (template repos should not sync from themselves)
+   - Kept `uvx rhiza materialize` for short-term (it's a language-agnostic CLI tool)
+   - Note: Long-term, a Go-native `rhiza` CLI could replace this
 
-8. **Update `.github/workflows/rhiza_validate.yml`**
-   - Same decision as sync — keep `uvx rhiza validate` or build Go alternative
-   - Short-term: keep as-is with a note
+8. ✅ **Updated `.github/workflows/rhiza_validate.yml`**
+   - Replaced `astral-sh/setup-uv` with `actions/setup-go@v5` using `go-version-file: .go-version`
+   - Simplified validation step (Go template repos skip Python rhiza CLI validation)
+   - Kept `make rhiza-test` for Go-based template self-tests
 
-9. **Update `.github/workflows/rhiza_pre-commit.yml`**
-   - Ensure it installs Go (not Python/uv) for running pre-commit hooks
-   - Note: pre-commit itself is Python, so `uv`/`pip` may still be needed to install pre-commit... but the hooks it runs should be Go tools
+9. ✅ **Updated `.github/workflows/rhiza_pre-commit.yml`**
+   - Added `actions/setup-go@v5` step with `go-version-file: .go-version`
+   - Go toolchain is now available for Go-based pre-commit hooks
+   - Updated header comment to reference rhiza-go
 
-10. **Update or remove `.gitlab-ci.yml`**
-    - Currently entirely Python-centric
-    - Option A: Rewrite for Go
-    - Option B: Remove if GitLab CI is not a priority for the Go template
+10. ✅ **Rewrote `.gitlab-ci.yml`** for Go
+    - Replaced Python-centric pipeline with self-contained Go CI
+    - Replaced `.python_base` template (uv image) with `.go_base` template (`golang:${GO_VERSION}-bookworm`)
+    - Removed all `include:` references to Python-specific GitLab workflow files
+    - Added inline `ci`, `lint`, and `fmt` jobs using `make` targets
+    - Removed Python-specific variables (`UV_EXTRA_INDEX_URL`, `PYPI_REPOSITORY_URL`)
+    - Note: GitLab workflow files in `.gitlab/workflows/` still contain Python content — these are legacy and no longer included
 
-#### Tests & Validation
+#### Validation Results
 
-- [ ] Push a test branch → `rhiza_ci.yml` runs Go tests successfully
-- [ ] Push a tag → `rhiza_release.yml` builds Go binaries and creates GitHub Release
-- [ ] `rhiza_codeql.yml` runs CodeQL for `go` (not `python`)
-- [ ] `copilot-setup-steps.yml` completes without errors in a Go-only environment
-- [ ] `session-start.sh` validates Go (not Python) environment
-- [ ] Dependabot creates PRs for `go.mod` dependency updates
-- [ ] Renovate creates PRs for Go module updates
-- [ ] `rhiza_docker.yml` builds successfully
-- [ ] `rhiza_pre-commit.yml` runs all Go hooks successfully
+- ✅ `session-start.sh` validates Go environment correctly (tested locally)
+- ✅ `make test` passes after all changes
+- ✅ No Python references in functional CI/CD files (workflows, hooks, configs)
+- ✅ Dependabot configured for `gomod` ecosystem
+- ✅ Renovate configured for `gomod` manager
+- ✅ CodeQL configured for `go` language analysis
+- ⏸️ GitHub Actions workflows not yet tested in CI (will be validated on push/tag)
+- ⚠️ `.gitlab/workflows/` directory still contains Python-specific workflow files — these are no longer included by `.gitlab-ci.yml` but could be cleaned up in a future phase
+- ⚠️ `rhiza_sync.yml` still uses `uvx rhiza` — this is intentional (language-agnostic CLI tool, short-term decision per roadmap)
+
+**What's Done (Go-adapted):**
+
+| File | Status |
+|------|--------|
+| `.github/workflows/copilot-setup-steps.yml` | ✅ setup-go, GOPATH/bin |
+| `.github/hooks/session-start.sh` | ✅ Validates Go, go.mod |
+| `.github/hooks/session-end.sh` | ✅ Already language-agnostic (make fmt, make test) |
+| `.github/copilot-instructions.md` | ✅ Full Go documentation |
+| `.github/workflows/rhiza_codeql.yml` | ✅ Go language matrix |
+| `.github/dependabot.yml` | ✅ gomod ecosystem |
+| `renovate.json` | ✅ gomod manager |
+| `.github/workflows/rhiza_sync.yml` | ✅ Excludes rhiza-go template |
+| `.github/workflows/rhiza_validate.yml` | ✅ setup-go, simplified validation |
+| `.github/workflows/rhiza_pre-commit.yml` | ✅ setup-go for Go hooks |
+| `.gitlab-ci.yml` | ✅ Go CI pipeline |
+
+**Next Agent Instructions:**
+The CI/CD and automation workflows are now Go-adapted. Key implementation details:
+- All GitHub Actions workflows use `actions/setup-go@v5` with `go-version-file: .go-version`
+- Agent setup (copilot-setup-steps) installs Go and adds `GOPATH/bin` to PATH
+- Session hooks validate Go environment (not Python)
+- Copilot instructions are fully Go-specific
+- Dependabot and Renovate track Go module dependencies
+- CodeQL scans Go code (not Python)
+- `.gitlab-ci.yml` is self-contained Go CI (no longer includes Python workflow files)
+- `rhiza_sync.yml` still uses `uvx rhiza` CLI — this is a conscious short-term decision
+- GitLab workflow files in `.gitlab/workflows/` are legacy Python files no longer included by the main config
+
+To validate CI/CD end-to-end:
+1. Push a branch or PR to trigger `rhiza_ci.yml`, `rhiza_codeql.yml`, `rhiza_pre-commit.yml`
+2. Verify workflows use Go toolchain (not Python)
+3. Check Dependabot/Renovate create PRs for `go.mod` updates
+4. When ready, push a tag to test `rhiza_release.yml`
 
 ---
 

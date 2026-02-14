@@ -1,16 +1,16 @@
-# This file is part of the jebel-quant/rhiza repository
-# (https://github.com/jebel-quant/rhiza).
+# This file is part of the jebel-quant/rhiza-go repository
+# (https://github.com/jebel-quant/rhiza-go).
 #
 # Configuration: Dependabot
 #
-# Purpose: Automate dependency updates for Python packages, GitHub Actions, and Docker images.
+# Purpose: Automate dependency updates for Go modules, GitHub Actions, and Docker images.
 #
 # Documentation: https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
 
 version: 2
 updates:
-  # Python dependencies using uv
-  - package-ecosystem: "uv"
+  # Go module dependencies
+  - package-ecosystem: "gomod"
     directory: "/"
     schedule:
       interval: "weekly"
@@ -23,9 +23,9 @@ updates:
     open-pull-requests-limit: 10
     labels:
       - "dependencies"
-      - "python"
+      - "go"
     groups:
-      python-dependencies:
+      go-dependencies:
         patterns:
           - "*"
         update-types:

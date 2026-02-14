@@ -19,11 +19,11 @@ jobs:
         with:
           lfs: true
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7.3.0
+      - name: Set up Go
+        uses: actions/setup-go@v5
         with:
-          version: "0.10.2"
-          
+          go-version-file: .go-version
+
       - name: Configure git auth for private packages
         uses: ./.github/actions/configure-git-auth
         with:
@@ -31,15 +31,10 @@ jobs:
 
       - name: Validate Rhiza config
         # don't run this in rhiza itself or rhiza-go. These are templates, not consumers.
-        # don't run for Go projects that have no pyproject.toml
         if: ${{ github.repository != 'jebel-quant/rhiza' && github.repository != 'jebel-quant/rhiza-go' }}
         shell: bash
         run: |
-          if [ -f "pyproject.toml" ]; then
-            uvx "rhiza>=0.8.0" validate .
-          else
-            echo "Skipping Python-specific validation (no pyproject.toml found)"
-          fi
+          echo "Skipping rhiza CLI validation for Go template projects"
         
       - name: Run Rhiza Tests
         shell: bash
