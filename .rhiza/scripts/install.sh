@@ -115,7 +115,7 @@ check_go_installation() {
   
   # Check if .go-version file exists
   if [ -f ".go-version" ]; then
-    REQUIRED_VERSION=$(cat .go-version | tr -d '[:space:]')
+    REQUIRED_VERSION=$(tr -d '[:space:]' < .go-version)
     
     # Extract major.minor version (e.g., 1.23 from 1.23.12)
     INSTALLED_MAJOR_MINOR=$(echo "$INSTALLED_VERSION" | cut -d'.' -f1-2)
