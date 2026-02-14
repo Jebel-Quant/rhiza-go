@@ -1,6 +1,6 @@
-# Rhiza Glossary
+# Rhiza-Go Glossary
 
-A comprehensive glossary of terms used in the Rhiza template system.
+A comprehensive glossary of terms used in the Rhiza-Go template system.
 
 ## Core Concepts
 
@@ -8,13 +8,13 @@ A comprehensive glossary of terms used in the Rhiza template system.
 A template approach where configuration files remain synchronized with an upstream source over time, as opposed to traditional "one-shot" template generators (like cookiecutter or copier) that generate files once and then disconnect from the source.
 
 ### Template Sync
-The process of pulling updates from the upstream Rhiza repository into a downstream project. Executed via `make sync`. Allows projects to receive ongoing improvements without manual copying.
+The process of pulling updates from the upstream Rhiza-Go repository into a downstream project. Executed via `make sync`. Allows projects to receive ongoing improvements without manual copying.
 
 ### Downstream Project
-A project that has adopted Rhiza templates. It receives updates from the upstream Rhiza repository through template sync.
+A project that has adopted Rhiza-Go templates. It receives updates from the upstream Rhiza-Go repository through template sync.
 
 ### Upstream Repository
-The source Rhiza repository (`jebel-quant/rhiza`) that contains the canonical template configurations. Changes here propagate to downstream projects via sync.
+The source Rhiza-Go repository (`jebel-quant/rhiza-go`) that contains the canonical template configurations. Changes here propagate to downstream projects via sync.
 
 ## Directory Structure
 
@@ -32,9 +32,6 @@ Directory for modular Makefile extensions. Files are auto-loaded in numeric orde
 
 ### `.rhiza/scripts/`
 Shell scripts for Rhiza operations (e.g., `release.sh`). POSIX-compliant for portability.
-
-### `.rhiza/utils/`
-Python utility scripts for Rhiza operations.
 
 ### `.rhiza/template.yml`
 Configuration file defining which files to sync from upstream, include/exclude patterns, and sync behavior.
@@ -61,7 +58,7 @@ A named command in the Makefile (e.g., `make test`, `make fmt`). Rhiza provides 
 ## Version Management
 
 ### Version Bump
-Incrementing the version number in `pyproject.toml`. Types:
+Incrementing the version number in the `VERSION` file. Types:
 - `major`: Breaking changes (1.0.0 → 2.0.0)
 - `minor`: New features (1.0.0 → 1.1.0)
 - `patch`: Bug fixes (1.0.0 → 1.0.1)
@@ -69,68 +66,47 @@ Incrementing the version number in `pyproject.toml`. Types:
 ### Release Tag
 A git tag prefixed with `v` (e.g., `v1.2.3`) that triggers the release workflow.
 
-### Version Matrix
-A JSON array of Python versions to test against, generated from `pyproject.toml`'s `requires-python` field. Used in CI for matrix testing.
-
 ## CI/CD
-
-### OIDC Publishing
-OpenID Connect-based authentication for PyPI publishing. Uses GitHub's identity provider instead of stored API tokens. More secure than traditional token-based auth.
-
-### Trusted Publisher
-A PyPI configuration that allows a specific GitHub repository/workflow to publish packages without API tokens, using OIDC authentication.
-
-### Matrix Testing
-Running CI tests across multiple Python versions simultaneously. Rhiza supports Python 3.11, 3.12, 3.13, and 3.14.
 
 ### SLSA Provenance
 Supply-chain Levels for Software Artifacts. Cryptographic attestations proving that build artifacts were produced by a specific CI workflow. Enables supply chain verification.
 
 ### SBOM (Software Bill of Materials)
-A formal record of components used to build software. Generated in SPDX or CycloneDX formats for supply chain transparency.
+A formal record of components used to build software. Generated in SPDX or CycloneDX formats for supply chain transparency. Generated via `syft` for Go binaries.
 
 ## Tools
 
-### uv
-A fast Python package installer and resolver from Astral. Rhiza uses `uv` for all Python operations:
-- `uv sync` - Install dependencies
-- `uv run` - Execute Python code
-- `uvx` - Run external tools
+### Go
+The Go programming language. Rhiza-Go uses Go for all project development, testing, and building.
 
-### Ruff
-A fast Python linter and formatter from Astral. Replaces flake8, isort, black, and many other tools. Configured in `ruff.toml`.
+### golangci-lint
+A fast, configurable Go linter aggregator. Runs 25+ linters in parallel. Configured in `.golangci.yml`.
 
-### Hatch
-A Python build backend used to create distribution packages (wheels and sdists). Invoked via `uvx hatch build`.
+### goimports
+A tool that updates Go import lines, adding missing ones and removing unreferenced ones. Also formats code like `gofmt`.
 
-### Deptry
-A tool that checks for unused and missing dependencies in Python projects. Integrated in CI via `make deptry`.
+### go vet
+Go's built-in static analysis tool. Examines Go source code and reports suspicious constructs.
 
-### Bandit
-A security linter for Python code. Finds common security issues. Integrated in pre-commit and CI.
+### go test
+Go's built-in testing framework. Supports unit tests, benchmarks, and examples. Run via `make test`.
 
 ### CodeQL
-GitHub's semantic code analysis engine. Scans for security vulnerabilities in Python code and GitHub Actions workflows.
-
-### Marimo
-A reactive Python notebook format. Rhiza includes support for marimo notebooks in the `book/` directory.
+GitHub's semantic code analysis engine. Scans for security vulnerabilities in Go code and GitHub Actions workflows.
 
 ## Configuration Files
 
-### `pyproject.toml`
-The central Python project configuration file (PEP 518/621). Contains project metadata, dependencies, and tool configurations.
+### `go.mod`
+The Go module definition file. Contains the module path, Go version, and dependency requirements.
 
-### `uv.lock`
-Lock file containing exact versions of all dependencies. Ensures reproducible builds across environments.
+### `go.sum`
+Checksums file containing cryptographic hashes of module dependencies. Ensures reproducible builds across environments.
 
-### `.python-version`
-Single-line file specifying the default Python version for the project. Used by `uv` and other tools.
+### `.go-version`
+Single-line file specifying the Go version for the project. Used by tooling and CI to ensure consistent Go versions.
 
-### `ruff.toml`
-Configuration for the Ruff linter/formatter. Defines enabled rules, line length, and per-file exceptions.
-
-### `pytest.ini`
-Configuration for pytest test runner. Sets logging levels and output options.
+### `.golangci.yml`
+Configuration for golangci-lint. Defines enabled linters, rules, and per-file exceptions.
 
 ### `.pre-commit-config.yaml`
 Configuration for pre-commit hooks. Defines checks that run before each git commit.
@@ -139,7 +115,10 @@ Configuration for pre-commit hooks. Defines checks that run before each git comm
 Cross-editor configuration for consistent coding style (indentation, line endings, etc.).
 
 ### `renovate.json`
-Configuration for Renovate, an automated dependency update bot.
+Configuration for Renovate, an automated dependency update bot. Configured for `gomod` manager.
+
+### `VERSION`
+Single-line file containing the project version (e.g., `0.1.0`). Single source of truth for versioning.
 
 ## Workflows
 
@@ -147,23 +126,24 @@ Configuration for Renovate, an automated dependency update bot.
 Continuous Integration workflow that runs tests on every push and pull request.
 
 ### Release Workflow
-Multi-phase workflow triggered by version tags. Builds packages, creates GitHub releases, publishes to PyPI, and optionally publishes devcontainer images.
+Multi-phase workflow triggered by version tags. Builds Go binaries for multiple platforms, creates GitHub releases, generates SBOM, and optionally publishes devcontainer images.
 
 ### Sync Workflow
-Workflow that synchronizes template files from upstream Rhiza repository.
+Workflow that synchronizes template files from upstream Rhiza-Go repository.
 
-### Security Workflow
-Workflow running security scans (pip-audit, bandit) on the codebase.
+### CodeQL Workflow
+Workflow running code security analysis using GitHub's CodeQL engine for Go and GitHub Actions.
 
 ## Commands Reference
 
 | Command | Description |
 |---------|-------------|
 | `make install` | Install dependencies and set up environment |
-| `make test` | Run pytest with coverage |
-| `make fmt` | Format and lint code with ruff |
+| `make test` | Run `go test` with coverage and race detection |
+| `make fmt` | Format code with `go fmt`, `goimports`, and `golangci-lint --fix` |
+| `make lint` | Run `golangci-lint` with 25+ linters |
+| `make vet` | Run `go vet` static analysis |
 | `make sync` | Sync templates from upstream |
 | `make bump` | Bump version number |
 | `make release` | Create and push release tag |
-| `make deptry` | Check for unused/missing dependencies |
 | `make help` | Show all available targets |

@@ -7,30 +7,29 @@ This directory contains the configuration for [GitHub Codespaces](https://github
 - `devcontainer.json`: The primary configuration file defining the development environment.
 - `bootstrap.sh`: Post-create script that initializes the environment (installing dependencies, setting up tools).
 
-## Python Version
+## Go Version
 
-The Python version is controlled by the `.python-version` file in the repository root (single source of truth).
+The Go version is controlled by the `.go-version` file in the repository root (single source of truth).
 
 **How it works:**
-1. The devcontainer uses a base Python image (3.12)
-2. `bootstrap.sh` reads `.python-version` and exports `PYTHON_VERSION`
-3. `make install` uses UV to create a venv with the exact Python version specified
-4. UV automatically downloads the correct Python version if needed
+1. The devcontainer uses the `mcr.microsoft.com/devcontainers/go` base image
+2. `bootstrap.sh` verifies Go is available and reports the version
+3. `make install` downloads Go module dependencies and installs development tools
+4. Go tools are installed to `$GOPATH/bin`
 
-No manual setup required - UV handles Python version management!
+No manual setup required — the devcontainer image provides Go and `make install` handles the rest!
 
 ## What's Configured
 
 The `.devcontainer` setup provides:
 
-- 🐍 **Python** runtime environment
-- 🔧 **UV Package Manager** - Fast Python package installer and resolver
-- ⚡ **Makefile** - For running project workflows
-- 🧪 **Pre-commit Hooks** - Automated code quality checks
-- 📊 **Marimo Integration** - Interactive notebook support with VS Code extension
-- 🔍 **Python Development Tools** - Pylance, Python extension, and optimized settings
-- 🚀 **Port Forwarding** - Port 8080 for development servers
-- 🔐 **SSH Agent Forwarding** - Full Git functionality with your host SSH keys
+- 🐹 **Go** runtime environment
+- 🔧 **Go Tools** — golangci-lint, goimports, and other development tools
+- ⚡ **Makefile** — For running project workflows
+- 🧪 **Pre-commit Hooks** — Automated code quality checks
+- 🔍 **Go Development Tools** — Go extension with test explorer, linting, and formatting
+- 🚀 **Port Forwarding** — Port 8080 for development servers
+- 🔐 **SSH Agent Forwarding** — Full Git functionality with your host SSH keys
 
 ## Usage
 
@@ -51,10 +50,10 @@ The `.devcontainer` setup provides:
 
 The dev container automatically runs the initialization script that:
 
-- Installs UV package manager
-- Configures the Python virtual environment
-- Installs project dependencies
-- Sets up pre-commit hooks
+- Verifies Go is installed and available
+- Adds `$GOPATH/bin` to PATH for installed tools
+- Installs Go module dependencies and development tools
+- Sets up pre-commit hooks (if available)
 
 ## Publishing Devcontainer Images
 

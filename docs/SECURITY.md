@@ -6,8 +6,7 @@ We actively support the following versions with security updates:
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 0.6.x   | :white_check_mark: |
-| < 0.6   | :x:                |
+| 0.1.x   | :white_check_mark: |
 
 ## Reporting a Vulnerability
 
@@ -20,7 +19,7 @@ We take security vulnerabilities seriously. If you discover a security issue, pl
 Instead, please report them via one of the following methods:
 
 1. **GitHub Security Advisories** (Preferred)
-   - Go to the [Security Advisories](https://github.com/jebel-quant/rhiza/security/advisories) page
+   - Go to the [Security Advisories](https://github.com/jebel-quant/rhiza-go/security/advisories) page
    - Click "New draft security advisory"
    - Fill in the details and submit
 
@@ -49,10 +48,9 @@ Please include the following information in your report:
 
 This security policy applies to:
 
-- The Rhiza template system and configuration files
+- The Rhiza-Go template system and configuration files
 - GitHub Actions workflows provided by this repository
 - Shell scripts in `.rhiza/scripts/`
-- Python utilities in `.rhiza/utils/`
 
 ### Out of Scope
 
@@ -68,30 +66,32 @@ The following are generally out of scope:
 This project implements several security measures:
 
 ### Code Scanning
-- **CodeQL**: Automated code scanning for Python and GitHub Actions
-- **Bandit**: Python security linter integrated in CI and pre-commit
-- **pip-audit**: Dependency vulnerability scanning
+- **CodeQL**: Automated code scanning for Go and GitHub Actions
+- **golangci-lint**: Includes security-focused linters (`gosec`, `gocritic`)
+- **go vet**: Built-in static analysis for common issues
 
 ### Supply Chain Security
 - **SLSA Provenance**: Build attestations for release artifacts (public repositories only)
-- **Locked Dependencies**: `uv.lock` ensures reproducible builds
+- **go.sum**: Cryptographic checksums ensure reproducible builds
 - **Renovate**: Automated dependency updates with security patches
+- **Dependabot**: Monitors `go.mod` for known vulnerabilities
 
 ### Release Security
-- **OIDC Publishing**: PyPI trusted publishing without stored credentials
+- **Multi-platform binaries**: Built via CI with `syft` SBOM generation
 - **Signed Commits**: GPG signing supported for releases
 - **Tag Protection**: Releases require version tag validation
 
 ## Security Best Practices for Users
 
-When using Rhiza templates in your projects:
+When using Rhiza-Go templates in your projects:
 
 1. **Keep Updated**: Regularly sync with upstream templates
 2. **Review Changes**: Review template sync PRs before merging
 3. **Enable Security Features**: Enable CodeQL and Dependabot in your repositories
-4. **Use Locked Dependencies**: Always commit `uv.lock` for reproducible builds
+4. **Use go.sum**: Always commit `go.sum` for reproducible builds
 5. **Configure Branch Protection**: Require PR reviews and status checks
+6. **Run govulncheck**: Use `govulncheck ./...` to check for known vulnerabilities in dependencies
 
 ## Acknowledgments
 
-We thank the security researchers and community members who help keep Rhiza secure.
+We thank the security researchers and community members who help keep Rhiza-Go secure.

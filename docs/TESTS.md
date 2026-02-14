@@ -1,268 +1,242 @@
-# Property-Based and Load/Stress Testing
+# Testing Guide
 
-This document describes the property-based testing and load/stress testing infrastructure added to the Rhiza project.
+This document describes the testing infrastructure and approaches used in Rhiza-Go projects.
 
 ## Overview
 
-Rhiza now includes two additional types of testing:
+Rhiza-Go uses Go's built-in testing framework (`go test`) with additional tooling for comprehensive quality assurance:
 
-1. **Property-Based Testing** (using Hypothesis) - Tests that verify properties hold across a wide range of generated inputs
-2. **Load/Stress Testing** (using pytest-benchmark) - Tests that measure performance and verify stability under load
+1. **Unit Testing** — Standard Go tests using `testing.T`
+2. **Table-Driven Tests** — Idiomatic Go pattern for testing multiple cases
+3. **Benchmarking** — Performance measurement using `testing.B`
+4. **Race Detection** — Built-in race condition detection with `-race` flag
 
-## Property-Based Testing
+## Running Tests
 
-Property-based tests use the [Hypothesis](https://hypothesis.readthedocs.io/) library to automatically generate test cases that verify certain properties always hold true.
-
-### Locations
-
-In a standard Rhiza project, there are two relevant locations for property-based tests:
-
-- **Project property-based tests** live in `tests/property/`. These are part of your normal test suite and are discovered by `pytest` via `pytest.ini:testpaths = tests`.
-- **Rhiza's own template/internal property-based tests** (if present) live in `.rhiza/tests/property/`. These are not part of your project's main test suite by default.
-
-### Running Property-Based Tests
-
-In a typical setup, the Make targets map to these suites as follows:
-
-- `make test`: runs `pytest` over everything under `tests/` (including `tests/property/`).
-- `make rhiza-test`: runs Rhiza's internal tests under `.rhiza/tests/` (including `.rhiza/tests/property/` if any exist).
-
-You can also invoke the corresponding `pytest` commands directly:
+### Using Make (Recommended)
 
 ```bash
-# Run all project property-based tests (what make test covers)
-pytest tests/property/ -v
+# Run all tests with coverage and race detection
+make test
 
-# Run Rhiza's internal/template property-based tests (if you have any in .rhiza)
-pytest .rhiza/tests/property/ -v
-
-# Run project property-based tests with more examples (increase coverage)
-pytest tests/property/ -v --hypothesis-max-examples=1000
-
-# Run project property-based tests with verbose Hypothesis output
-pytest tests/property/ -v --hypothesis-verbosity=verbose
+# Run benchmarks
+go test -bench=. ./...
 ```
 
-### Example Tests
-
-The following property-based tests are included as examples:
-
-#### Generic Property Tests
-- **test_sort_correctness_using_properties**: Verifies that sorted() correctly orders lists and preserves all elements including duplicates
-
-## Load/Stress Testing
-
-Load and stress tests use [pytest-benchmark](https://pytest-benchmark.readthedocs.io/) to measure performance and verify system stability under load.
-
-### Location
-
-Benchmark and stress tests are located in `tests/benchmarks/`
-
-### Running Benchmark Tests
+### Using Go Directly
 
 ```bash
-# Run all benchmarks
-make benchmark
+# Run all tests
+go test ./...
 
-# Or with pytest directly
-pytest tests/benchmarks/ -v
+# Run tests in a specific package
+go test ./pkg/config/ -v
 
-# Run benchmarks and generate histogram
-pytest tests/benchmarks/ --benchmark-histogram=_tests/benchmarks/histogram
+# Run a specific test function
+go test ./pkg/config/ -run TestConfigName -v
 
-# Run benchmarks and save results
-pytest tests/benchmarks/ --benchmark-json=_tests/benchmarks/results.json
+# Run with race detection
+go test -race ./...
 
-# Skip benchmarks (for CI)
-pytest tests/benchmarks/ --benchmark-skip
+# Run with coverage
+go test -coverprofile=coverage.out ./...
+go tool cover -html=coverage.out
 
-# Run only stress tests (note: these don't run with make benchmark by default)
-pytest tests/benchmarks/ -m stress -v
-
-# Skip stress tests (run only performance benchmarks)
-pytest tests/benchmarks/ -m "not stress" -v
+# Run benchmarks
+go test -bench=. -benchmem ./...
 ```
 
-**Note**: The `make benchmark` target runs with `--benchmark-only`, which means stress tests (that don't use the `benchmark` fixture) will be skipped. To run stress tests explicitly, use `pytest tests/benchmarks/ -m stress -v`.
+## Writing Tests
 
-### Benchmark Test Categories
+### Unit Tests
 
-#### 1. Makefile Performance
-Tests that measure the performance of common Makefile operations:
-- `test_help_target_performance` - Measures help target execution time
-- `test_print_variable_performance` - Measures variable printing performance
-- `test_dry_run_install_performance` - Measures dry-run install performance
-- `test_makefile_parsing_overhead` - Measures Makefile parsing overhead
+Place test files alongside the code they test, using the `_test.go` suffix:
 
-#### 2. File System Operations
-Tests that benchmark file system operations:
-- `test_directory_traversal_performance` - Measures directory traversal speed
-- `test_file_reading_performance` - Measures file reading performance
-- `test_multiple_file_checks_performance` - Measures file existence checking
+```go
+// pkg/config/config_test.go
+package config
 
-#### 3. Subprocess Overhead
-Tests that measure subprocess creation overhead:
-- `test_subprocess_creation_overhead` - Measures subprocess creation time
-- `test_git_command_performance` - Measures git command execution time
+import "testing"
 
-#### 4. Stress Scenarios
-Tests that verify stability under load (marked with `@pytest.mark.stress`):
-- `test_repeated_help_invocations` - Stress tests repeated help invocations (100 iterations)
-- `test_concurrent_print_variable_stress` - Tests concurrent Makefile invocations (deterministic)
-- `test_file_system_stress` - Tests rapid file creation/deletion (100 iterations)
-
-**Note**: Stress tests can be slow and are marked with the `stress` marker. They don't use the `benchmark` fixture, so they won't run with `make benchmark` (which uses `--benchmark-only`). Use `pytest tests/benchmarks/ -m stress -v` to run them explicitly.
-
-### Understanding Benchmark Results
-
-Benchmark output includes:
-- **Min/Max**: Minimum and maximum execution times
-- **Mean**: Average execution time
-- **StdDev**: Standard deviation (consistency)
-- **Median**: Median execution time
-- **IQR**: Interquartile range
-- **Outliers**: Number of outlier measurements
-- **OPS**: Operations per second (1/Mean)
-
-Example output:
+func TestConfigName(t *testing.T) {
+    cfg := New()
+    if cfg.Name() != "expected" {
+        t.Errorf("got %q, want %q", cfg.Name(), "expected")
+    }
+}
 ```
---------------------------------------------------- benchmark: 1 tests ---------------------------------------------------
-Name (time in ms)                    Min      Max     Mean  StdDev   Median     IQR  Outliers      OPS  Rounds  Iterations
---------------------------------------------------------------------------------------------------------------------------
-test_help_target_performance     16.5255  18.0592  16.9294  0.3194  16.8354  0.4791      15;1  59.0689      55           1
---------------------------------------------------------------------------------------------------------------------------
+
+### Table-Driven Tests
+
+The idiomatic Go approach for testing multiple cases:
+
+```go
+func TestAdd(t *testing.T) {
+    tests := []struct {
+        name     string
+        a, b     int
+        expected int
+    }{
+        {"positive numbers", 2, 3, 5},
+        {"negative numbers", -1, -2, -3},
+        {"zero", 0, 0, 0},
+        {"mixed", -1, 1, 0},
+    }
+
+    for _, tt := range tests {
+        t.Run(tt.name, func(t *testing.T) {
+            result := Add(tt.a, tt.b)
+            if result != tt.expected {
+                t.Errorf("Add(%d, %d) = %d, want %d", tt.a, tt.b, result, tt.expected)
+            }
+        })
+    }
+}
+```
+
+### Benchmarks
+
+Measure performance with Go's built-in benchmarking:
+
+```go
+func BenchmarkProcess(b *testing.B) {
+    for i := 0; i < b.N; i++ {
+        Process(testData)
+    }
+}
+```
+
+Run benchmarks:
+```bash
+go test -bench=. -benchmem ./...
+```
+
+### Test Helpers
+
+Use `t.Helper()` for cleaner test output:
+
+```go
+func assertEqual(t *testing.T, got, want string) {
+    t.Helper()
+    if got != want {
+        t.Errorf("got %q, want %q", got, want)
+    }
+}
+```
+
+## Test Organisation
+
+### Project Structure
+
+```text
+cmd/
+├── rhiza-go/
+│   ├── main.go
+│   └── main_test.go          # Tests for main package
+pkg/
+├── config/
+│   ├── config.go
+│   └── config_test.go        # Tests for config package
+internal/
+├── utils/
+│   ├── utils.go
+│   └── utils_test.go         # Tests for utils package
+```
+
+### Template Tests
+
+Rhiza template validation tests live in `.rhiza/tests/`:
+
+```bash
+# Run template self-tests
+make rhiza-test
 ```
 
 ## Integration with CI/CD
 
-### GitHub Actions Integration
+### GitHub Actions
 
-The benchmark tests are integrated with GitHub Actions via `.github/workflows/rhiza_benchmarks.yml`:
+Tests run automatically via `.github/workflows/rhiza_ci.yml`:
+- Runs on every push and pull request
+- Includes race detection (`-race`)
+- Generates coverage reports
+- Fails if tests don't pass
 
-- Runs benchmarks on every push to main and pull requests
-- Stores historical benchmark data in the `gh-pages` branch
-- Alerts on performance regressions > 150%
-- Posts warnings to PRs for performance degradation
+### Coverage
 
-### Running in CI
-
-The property-based tests run as part of the regular test suite:
-
-```bash
-# Run all tests including property-based tests
-make test
-```
-
-Benchmarks can be run separately or as part of validation:
+Coverage is collected during `make test` and reported in the CI output. View detailed coverage locally:
 
 ```bash
-# Run benchmarks
-make benchmark
+go test -coverprofile=coverage.out ./...
+go tool cover -html=coverage.out -o coverage.html
+open coverage.html
 ```
 
 ## Best Practices
 
-### Writing Property-Based Tests
+### Writing Good Tests
 
-1. **Focus on invariants**: Test properties that should always hold true
-2. **Use appropriate strategies**: Choose Hypothesis strategies that generate realistic inputs
-3. **Keep tests fast**: Property tests run multiple times, so keep them quick
-4. **Test edge cases**: Use `@example` decorator to test specific known edge cases
+1. **Test behaviour, not implementation** — Focus on what the function does, not how
+2. **Use table-driven tests** — Reduce boilerplate for multiple test cases
+3. **Test edge cases** — Empty inputs, nil values, boundary conditions
+4. **Keep tests fast** — Avoid network calls and file I/O where possible
+5. **Use `t.Parallel()`** — Run independent tests concurrently
+6. **Name tests descriptively** — Use `Test<Function>_<Scenario>` naming
 
-Example:
-```python
-from hypothesis import given, strategies as st, example
+### Test Fixtures
 
-@given(version=st.from_regex(r"^\d+\.\d+\.\d+$", fullmatch=True))
-@example(version="0.0.0")  # Test specific edge case
-def test_version_parsing(version):
-    parts = version.split(".")
-    assert len(parts) == 3
-    assert all(p.isdigit() for p in parts)
+Use `testdata/` directories for test fixtures (automatically ignored by the Go toolchain):
+
+```go
+func TestParseConfig(t *testing.T) {
+    data, err := os.ReadFile("testdata/config.json")
+    if err != nil {
+        t.Fatal(err)
+    }
+    // ... test with data
+}
 ```
 
-### Writing Benchmark Tests
+### Subtests
 
-1. **Benchmark real operations**: Test actual operations users will perform
-2. **Use fixtures wisely**: Use module or session-scoped fixtures for expensive setup
-3. **Test multiple scenarios**: Benchmark best case, average case, and worst case
-4. **Monitor trends**: Track benchmark results over time to detect regressions
+Use subtests for organised test output:
 
-Example:
-```python
-def test_operation_performance(benchmark):
-    def run_operation():
-        # Operation to benchmark
-        return perform_operation()
-    
-    result = benchmark(run_operation)
-    assert result is not None
+```go
+func TestAPI(t *testing.T) {
+    t.Run("Create", func(t *testing.T) { /* ... */ })
+    t.Run("Read", func(t *testing.T) { /* ... */ })
+    t.Run("Update", func(t *testing.T) { /* ... */ })
+    t.Run("Delete", func(t *testing.T) { /* ... */ })
+}
 ```
-
-### Writing Stress Tests
-
-1. **Test realistic scenarios**: Simulate real-world usage patterns
-2. **Set reasonable thresholds**: Allow small failure rates for resource contention
-3. **Test concurrency**: Use ThreadPoolExecutor or ProcessPoolExecutor for concurrent tests
-4. **Monitor resource usage**: Consider memory, CPU, and I/O in addition to time
-
-Example:
-```python
-def test_concurrent_operations(root):
-    import concurrent.futures
-    
-    def operation():
-        # Operation to stress test
-        return perform_operation()
-    
-    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-        futures = [executor.submit(operation) for _ in range(100)]
-        results = [f.result() for f in concurrent.futures.as_completed(futures)]
-    
-    success_rate = sum(results) / len(results)
-    assert success_rate == 1.0  # Rhiza template stress tests require 100% success
-```
-
-## Dependencies
-
-The following dependencies are required for property-based and load/stress testing:
-
-```
-# Property-based testing
-hypothesis>=6.150.0
-
-# Benchmarking and performance testing
-pytest-benchmark>=5.2.3
-pygal>=3.1.0
-```
-
-These are automatically installed when running `make install` or by installing from `.rhiza/requirements/tests.txt`.
 
 ## Troubleshooting
 
-### Hypothesis Hangs or Times Out
+### Tests Fail with Race Conditions
 
-If Hypothesis tests hang, you can:
-1. Reduce the number of examples: `pytest --hypothesis-max-examples=10`
-2. Set a deadline: `pytest --hypothesis-deadline=1000`
-3. Use the CI profile: `pytest --hypothesis-profile=ci`
+If tests fail with the `-race` flag:
+1. Check for shared mutable state between goroutines
+2. Use `sync.Mutex` or channels for synchronisation
+3. Use `t.Parallel()` only for truly independent tests
 
-### Benchmarks Vary Too Much
+### Tests Are Slow
 
-If benchmark results have high variance:
-1. Close other applications to reduce system load
-2. Increase the number of rounds: `pytest --benchmark-min-rounds=10`
-3. Run on a consistent environment (CI is preferred for accurate benchmarks)
+If tests take too long:
+1. Use `testing.Short()` to skip long-running tests: `go test -short ./...`
+2. Mock external dependencies
+3. Use `t.Parallel()` for independent tests
+4. Profile with `go test -cpuprofile=cpu.out ./...`
 
-### Stress Tests Fail
+### Coverage Is Low
 
-If stress tests fail occasionally:
-1. Check system resources (memory, CPU)
-2. Increase acceptable failure rate if resource contention is expected
-3. Reduce iteration count for local development
+If coverage is below the threshold:
+1. Run `go test -coverprofile=coverage.out ./...`
+2. View uncovered lines: `go tool cover -html=coverage.out`
+3. Focus on testing critical paths first
 
 ## References
 
-- [Hypothesis Documentation](https://hypothesis.readthedocs.io/)
-- [pytest-benchmark Documentation](https://pytest-benchmark.readthedocs.io/)
-- [GitHub Actions Benchmark Action](https://github.com/benchmark-action/github-action-benchmark)
+- [Go Testing Package](https://pkg.go.dev/testing)
+- [Go Testing FAQ](https://go.dev/doc/faq#testing)
+- [Table-Driven Tests](https://go.dev/wiki/TableDrivenTests)
+- [Go Code Coverage](https://go.dev/blog/cover)

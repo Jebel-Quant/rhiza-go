@@ -1,4 +1,4 @@
-# Rhiza Demo
+# Rhiza-Go Demo
 
 ## Quick Demo (asciinema)
 
@@ -13,20 +13,20 @@
 ```bash
 # Install asciinema
 brew install asciinema  # macOS
-# or: pip install asciinema
+# or: go install github.com/asciinema/asciinema@latest
 ```
 
 ### Record the Demo
 
 ```bash
 # Start recording
-asciinema rec rhiza-demo.cast
+asciinema rec rhiza-go-demo.cast
 
 # Run the demo script (see below)
 # Press Ctrl+D or type 'exit' when done
 
 # Upload to asciinema.org
-asciinema upload rhiza-demo.cast
+asciinema upload rhiza-go-demo.cast
 ```
 
 ### Demo Script
@@ -37,7 +37,7 @@ Run these commands during recording:
 # 1. Show available commands
 make help
 
-# 2. Install dependencies (fast with uv)
+# 2. Install dependencies
 make install
 
 # 3. Run tests
@@ -46,14 +46,14 @@ make test
 # 4. Format and lint
 make fmt
 
-# 5. Check dependencies
-make deptry
+# 5. Run linter
+make lint
 
 # 6. Show version bump options
 make bump BUMP=patch --dry-run
 
-# 7. Validate project structure
-make validate
+# 7. Build the application
+go build ./cmd/rhiza-go/
 ```
 
 ### Automated Demo Script
@@ -62,8 +62,8 @@ Save as `demo.sh` and run with `asciinema rec -c ./demo.sh`:
 
 ```bash
 #!/bin/bash
-# Rhiza Demo Script
-# Usage: asciinema rec -c ./demo.sh rhiza-demo.cast
+# Rhiza-Go Demo Script
+# Usage: asciinema rec -c ./demo.sh rhiza-go-demo.cast
 
 set -e
 
@@ -77,7 +77,7 @@ type_cmd() {
 
 clear
 echo "═══════════════════════════════════════"
-echo "       Rhiza - Living Templates        "
+echo "     Rhiza-Go — Living Templates       "
 echo "═══════════════════════════════════════"
 sleep 2
 
@@ -93,7 +93,7 @@ sleep 2
 type_cmd "make fmt"
 sleep 2
 
-type_cmd "make deptry"
+type_cmd "make lint"
 sleep 2
 
 echo -e "\n\033[1;34mDemo complete!\033[0m"
@@ -109,10 +109,10 @@ sleep 2
 npm install -g terminalizer
 
 # Record
-terminalizer record rhiza-demo
+terminalizer record rhiza-go-demo
 
 # Generate GIF
-terminalizer render rhiza-demo -o rhiza-demo.gif
+terminalizer render rhiza-go-demo -o rhiza-go-demo.gif
 ```
 
 ### Using vhs (by Charmbracelet)
@@ -120,8 +120,8 @@ terminalizer render rhiza-demo -o rhiza-demo.gif
 Create `demo.tape`:
 
 ```tape
-# Rhiza Demo
-Output rhiza-demo.gif
+# Rhiza-Go Demo
+Output rhiza-go-demo.gif
 
 Set FontSize 14
 Set Width 1200
@@ -167,7 +167,7 @@ vhs demo.tape
 ### GIF
 
 ```markdown
-![Rhiza Demo](docs/rhiza-demo.gif)
+![Rhiza-Go Demo](docs/rhiza-go-demo.gif)
 ```
 
 ### Video (GitHub supports mp4)
@@ -180,10 +180,10 @@ https://user-images.githubusercontent.com/YOUR_ID/VIDEO_ID.mp4
 
 1. **Introduction** (5s) - Show project structure with `ls -la`
 2. **Help** (5s) - `make help` to show available commands
-3. **Install** (10s) - `make install` showing fast uv setup
+3. **Install** (10s) - `make install` showing Go dependency setup
 4. **Test** (10s) - `make test` with coverage output
-5. **Format** (5s) - `make fmt` for linting
-6. **Quality** (5s) - `make deptry` for dependency check
+5. **Format** (5s) - `make fmt` for formatting
+6. **Lint** (5s) - `make lint` for code quality check
 7. **Outro** (3s) - Summary message
 
 Total: ~45 seconds
