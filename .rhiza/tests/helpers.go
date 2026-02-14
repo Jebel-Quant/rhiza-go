@@ -7,7 +7,10 @@
 // Run with: make rhiza-test
 package rhizatests
 
-import "path/filepath"
+import (
+	"os"
+	"path/filepath"
+)
 
 // repoRoot caches the repository root path found by findRepoRoot.
 var repoRoot = findRepoRoot()
@@ -15,4 +18,24 @@ var repoRoot = findRepoRoot()
 // repoPath returns the absolute path to a file relative to the repository root.
 func repoPath(rel string) string {
 	return filepath.Join(repoRoot, rel)
+}
+
+// findRepoRoot returns the root of the repository by walking up from the current
+// directory looking for go.mod, handling both `go test ./...` and `make rhiza-test`.
+func findRepoRoot() string {
+	dir, err := os.Getwd()
+	if err != nil {
+		return "."
+	}
+
+	for {
+		if _, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil {
+			return dir
+		}
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			return "."
+		}
+		dir = parent
+	}
 }
