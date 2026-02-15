@@ -38,7 +38,7 @@ mkdocs-build:: install-uv ## build mkdocs documentation site
 #   name | source index | book-relative index | source dir | book dir
 
 BOOK_SECTIONS := \
-  "API|docs/package-docs.txt|api/index.txt|docs|api" \
+  "API|docs/package-docs.txt|api/index.txt|docs/package-docs.txt|api" \
   "Official Documentation|$(MKDOCS_OUTPUT)/index.html|docs/index.html|$(MKDOCS_OUTPUT)|docs" \
   "Coverage|coverage.html|coverage/index.html|.|coverage"
 
@@ -56,11 +56,15 @@ book:: test docs mkdocs-build ## compile the companion documentation book
 	  rest=$${entry#*|}; \
 	  src_index=$${rest%%|*}; rest=$${rest#*|}; \
 	  book_index=$${rest%%|*}; rest=$${rest#*|}; \
-	  src_dir=$${rest%%|*}; book_dir=$${rest#*|}; \
+	  src_path=$${rest%%|*}; book_dir=$${rest#*|}; \
 	  if [ -f "$$src_index" ]; then \
 	    printf "${BLUE}[INFO] Adding $$name...${RESET}\n"; \
 	    mkdir -p "_book/$$book_dir"; \
-	    cp -r "$$src_dir/"* "_book/$$book_dir/"; \
+	    if [ -d "$$src_path" ]; then \
+	      cp -r "$$src_path/"* "_book/$$book_dir/"; \
+	    else \
+	      cp "$$src_path" "_book/$$book_index"; \
+	    fi; \
 	    if [ $$first -eq 0 ]; then \
 	      printf ",\n" >> _book/links.json; \
 	    fi; \
