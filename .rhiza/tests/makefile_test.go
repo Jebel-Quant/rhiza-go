@@ -3,6 +3,7 @@ package rhizatests
 import (
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -27,7 +28,7 @@ func TestMakefileTargetsExist(t *testing.T) {
 
 	// Get all available targets using make -pn
 	cmd := exec.Command("make", "-pn")
-	cmd.Dir = findRepoRoot()
+	cmd.Dir = findRepoRoot(t)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		// make -pn can return non-zero but still produce useful output
@@ -64,7 +65,7 @@ func TestMakefileTargetsExist(t *testing.T) {
 
 // TestMakefileIncludesRhiza validates that the Makefile includes rhiza.mk.
 func TestMakefileIncludesRhiza(t *testing.T) {
-	makefilePath := repoPath("Makefile")
+	makefilePath := filepath.Join(findRepoRoot(t), "Makefile")
 	//nolint:gosec // Reading Makefile is intended
 	data, err := os.ReadFile(makefilePath)
 	if err != nil {
@@ -74,5 +75,28 @@ func TestMakefileIncludesRhiza(t *testing.T) {
 	content := string(data)
 	if !strings.Contains(content, "include .rhiza/rhiza.mk") {
 		t.Error("Makefile should include .rhiza/rhiza.mk")
+	}
+}
+
+// findRepoRoot returns the repository root by walking up from the current
+// directory looking for go.mod. If the repository root cannot be determined,
+// the test is failed immediately.
+func findRepoRoot(t *testing.T) string {
+	t.Helper()
+
+	dir, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("failed to determine repository root: %v", err)
+	}
+
+	for {
+		if _, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil {
+			return dir
+		}
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			t.Fatalf("failed to find repository root (no go.mod found)")
+		}
+		dir = parent
 	}
 }
