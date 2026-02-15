@@ -98,3 +98,57 @@ func TestLoadTemplate_PathTraversal(t *testing.T) {
 		})
 	}
 }
+
+func TestLoadTemplate_ValidPaths(t *testing.T) {
+	// Create a temporary directory for testing
+	tmpDir := t.TempDir()
+
+	// Test cases for valid paths that should not be rejected
+	validPaths := []struct {
+		name     string
+		path     string
+		createAt string // relative path within tmpDir
+	}{
+		{
+			name:     "simple relative path",
+			createAt: "config.yml",
+		},
+		{
+			name:     "nested relative path",
+			createAt: "templates/config.yml",
+		},
+		{
+			name:     "deeply nested relative path",
+			createAt: ".rhiza/templates/config.yml",
+		},
+	}
+
+	for _, tt := range validPaths {
+		t.Run(tt.name, func(t *testing.T) {
+			// Create the directory structure
+			fullPath := filepath.Join(tmpDir, tt.createAt)
+			if err := os.MkdirAll(filepath.Dir(fullPath), 0755); err != nil {
+				t.Fatalf("Failed to create directory: %v", err)
+			}
+
+			// Create a valid template file
+			content := `repository: test/repo
+ref: v1.0.0
+include:
+  - file.txt
+`
+			if err := os.WriteFile(fullPath, []byte(content), 0644); err != nil {
+				t.Fatalf("Failed to write test file: %v", err)
+			}
+
+			// Test that the path is accepted (absolute path to temp file)
+			tmpl, err := LoadTemplate(fullPath)
+			if err != nil {
+				t.Errorf("LoadTemplate() failed for valid path %q: %v", tt.createAt, err)
+			}
+			if tmpl == nil {
+				t.Error("Expected non-nil template")
+			}
+		})
+	}
+}
