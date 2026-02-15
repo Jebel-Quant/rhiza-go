@@ -57,6 +57,7 @@ exclude: |
 ## 📚 Table of Contents
 
 - [Why Rhiza-Go?](#-why-rhiza-go)
+- [Installation](#-installation)
 - [Quick Start](#-quick-start)
 - [What You Get](#-what-you-get)
 - [Available Tasks](#-available-tasks)
@@ -64,9 +65,45 @@ exclude: |
 - [CI/CD Support](#-cicd-support)
 - [Contributing](#-contributing)
 
+## 📦 Installation
+
+Rhiza-Go can be installed in several ways depending on your needs:
+
+### Quick Install (Recommended)
+
+**macOS and Linux:**
+```bash
+curl -sSfL https://raw.githubusercontent.com/Jebel-Quant/rhiza-go/main/install.sh | sh
+```
+
+**Homebrew:**
+```bash
+brew tap Jebel-Quant/tap
+brew install rhiza-go
+```
+
+**Go Install:**
+```bash
+go install github.com/jebel-quant/rhiza-go/cmd/rhiza-go@latest
+```
+
+**Windows:**
+
+Download the latest release from the [releases page](https://github.com/Jebel-Quant/rhiza-go/releases/latest) or use the PowerShell script in [INSTALL.md](INSTALL.md).
+
+### Full Installation Guide
+
+For detailed installation instructions including:
+- Manual downloads and verification
+- Building from source
+- Docker usage
+- Troubleshooting
+
+See the complete [Installation Guide](INSTALL.md).
+
 ## 🚀 Quick Start
 
-### Prerequisites
+### Prerequisites (For Development)
 
 - **Git**: Required for version control
 - **Make**: Command runner for all development tasks

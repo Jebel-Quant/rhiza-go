@@ -64,3 +64,19 @@ snapshot:
 release:
   draft: true
   replace_existing_draft: true
+
+brews:
+  - name: rhiza-go
+    repository:
+      owner: Jebel-Quant
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    directory: Formula
+    homepage: "https://github.com/Jebel-Quant/rhiza-go"
+    description: "Strong roots for Go projects - reusable configuration templates for modern Go development"
+    license: "MIT"
+    skip_upload: auto
+    install: |
+      bin.install "rhiza-go"
+    test: |
+      system "#{bin}/rhiza-go", "--version"
