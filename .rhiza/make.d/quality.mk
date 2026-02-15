@@ -6,15 +6,8 @@
 
 ##@ Quality and Formatting
 
-fmt: install-go ## format Go code
-	@printf "${BLUE}[INFO] Formatting Go code...${RESET}\n"
-	@$(GO_BIN) fmt ./...
-	@gofmt -s -w .
-	@if command -v goimports >/dev/null 2>&1; then \
-	  goimports -w .; \
-	else \
-	  printf "${YELLOW}[WARN] goimports not found, skipping import formatting${RESET}\n"; \
-	fi
+fmt: install-uv ## run pre-commit hooks for formatting and linting
+	@${UVX_BIN} pre-commit run --all-files
 
 check-fmt: install-go ## check if Go code is formatted
 	@printf "${BLUE}[INFO] Checking Go code formatting...${RESET}\n"
