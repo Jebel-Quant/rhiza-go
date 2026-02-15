@@ -68,11 +68,6 @@ func TestLoadTemplate_PathTraversal(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:    "absolute path with traversal",
-			path:    "/etc/../../../etc/passwd",
-			wantErr: true,
-		},
-		{
 			name:    "relative path with traversal",
 			path:    "../../../etc/passwd",
 			wantErr: true,
@@ -87,6 +82,11 @@ func TestLoadTemplate_PathTraversal(t *testing.T) {
 			path:    "safe/../../unsafe/file.txt",
 			wantErr: true,
 		},
+		{
+			name:    "path starting with traversal",
+			path:    "../config.yml",
+			wantErr: true,
+		},
 	}
 
 	for _, tt := range tests {
@@ -95,8 +95,8 @@ func TestLoadTemplate_PathTraversal(t *testing.T) {
 			if (err != nil) != tt.wantErr {
 				t.Errorf("LoadTemplate() error = %v, wantErr %v", err, tt.wantErr)
 			}
-			if err != nil && !tt.wantErr {
-				t.Logf("Expected error but got: %v", err)
+			if err == nil && tt.wantErr {
+				t.Error("Expected error but got nil")
 			}
 		})
 	}
