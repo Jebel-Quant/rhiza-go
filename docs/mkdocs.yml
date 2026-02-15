@@ -6,7 +6,8 @@ site_description: Reusable configuration templates for modern Go projects
 site_url: ""
 
 # Documentation source directory (relative to this config file location)
-docs_dir: docs
+# Note: site_dir is passed via command line (-d flag) to avoid path conflicts
+docs_dir: .
 
 # Theme configuration - Material for MkDocs
 # https://squidfunk.github.io/mkdocs-material/
@@ -68,3 +69,4 @@ nav:
   - DevContainer: DEVCONTAINER.md
   - Demo: DEMO.md
   - Glossary: GLOSSARY.md
+

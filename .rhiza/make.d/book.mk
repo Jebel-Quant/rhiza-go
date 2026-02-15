@@ -9,6 +9,9 @@
 # Default output directory for MkDocs
 MKDOCS_OUTPUT ?= _mkdocs
 
+# MkDocs config file location
+MKDOCS_CONFIG ?= docs/mkdocs.yml
+
 # Book configuration
 BOOK_TITLE ?= $(shell basename $(PWD))
 BOOK_SUBTITLE ?= Go Project Documentation
@@ -17,12 +20,15 @@ BOOK_SUBTITLE ?= Go Project Documentation
 
 # Build MkDocs documentation site
 mkdocs-build:: install-uv ## build mkdocs documentation site
-	@if [ -f "mkdocs.yml" ]; then \
-	  printf "${BLUE}[INFO] Building MkDocs site...${RESET}\n"; \
-	  $(UVX_BIN) --from mkdocs-material mkdocs build -d "$(MKDOCS_OUTPUT)"; \
-	  printf "${BLUE}[INFO] MkDocs site built to $(MKDOCS_OUTPUT)/${RESET}\n"; \
+	@printf "${BLUE}[INFO] Building MkDocs site...${RESET}\n"
+	@if [ -f "$(MKDOCS_CONFIG)" ]; then \
+	  rm -rf "$(MKDOCS_OUTPUT)"; \
+	  MKDOCS_OUTPUT_ABS="$$(pwd)/$(MKDOCS_OUTPUT)"; \
+	  $(UVX_BIN) --with mkdocs-material --with "pymdown-extensions>=10.0" mkdocs build \
+	    -f "$(MKDOCS_CONFIG)" \
+	    -d "$$MKDOCS_OUTPUT_ABS"; \
 	else \
-	  printf "${YELLOW}[WARN] No mkdocs.yml found, skipping MkDocs${RESET}\n"; \
+	  printf "${YELLOW}[WARN] $(MKDOCS_CONFIG) not found, skipping MkDocs build${RESET}\n"; \
 	fi
 
 # ----------------------------
@@ -32,8 +38,8 @@ mkdocs-build:: install-uv ## build mkdocs documentation site
 #   name | source index | book-relative index | source dir | book dir
 
 BOOK_SECTIONS := \
-  "API Docs|docs/package-docs.txt|docs/package-docs.txt|docs|go-docs" \
-  "Documentation|$(MKDOCS_OUTPUT)/index.html|docs/index.html|$(MKDOCS_OUTPUT)|docs" \
+  "API|docs/package-docs.txt|api/index.txt|docs|api" \
+  "Official Documentation|$(MKDOCS_OUTPUT)/index.html|docs/index.html|$(MKDOCS_OUTPUT)|docs" \
   "Coverage|coverage.html|coverage/index.html|.|coverage"
 
 # The 'book' target assembles documentation from available sources.
@@ -54,18 +60,14 @@ book:: test docs mkdocs-build ## compile the companion documentation book
 	  if [ -f "$$src_index" ]; then \
 	    printf "${BLUE}[INFO] Adding $$name...${RESET}\n"; \
 	    mkdir -p "_book/$$book_dir"; \
-	    if [ -d "$$src_dir" ]; then \
-	      cp -r "$$src_dir/"* "_book/$$book_dir/"; \
-	    else \
-	      cp "$$src_index" "_book/$$book_index"; \
-	    fi; \
+	    cp -r "$$src_dir/"* "_book/$$book_dir/"; \
 	    if [ $$first -eq 0 ]; then \
 	      printf ",\n" >> _book/links.json; \
 	    fi; \
 	    printf "  \"%s\": \"./%s\"" "$$name" "$$book_index" >> _book/links.json; \
 	    first=0; \
 	  else \
-	    printf "${YELLOW}[WARN] Missing $$name ($$src_index), skipping${RESET}\n"; \
+	    printf "${YELLOW}[WARN] Missing $$name, skipping${RESET}\n"; \
 	  fi; \
 	done; \
 	printf "\n}\n" >> _book/links.json
@@ -82,7 +84,7 @@ book:: test docs mkdocs-build ## compile the companion documentation book
 	    printf "${YELLOW}[WARN] Logo file $(LOGO_FILE) not found, skipping${RESET}\n"; \
 	  fi; \
 	fi; \
-	$(UVX_BIN) minibook \
+	"$(UVX_BIN)" minibook \
 	  --title "$(BOOK_TITLE)" \
 	  --subtitle "$(BOOK_SUBTITLE)" \
 	  $$TEMPLATE_ARG \
