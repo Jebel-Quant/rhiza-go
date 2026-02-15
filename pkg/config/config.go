@@ -46,8 +46,15 @@ type Template struct {
 
 // LoadTemplate reads template configuration from .rhiza/template.yml
 func LoadTemplate(path string) (*Template, error) {
-	// #nosec G304 -- Reading template file from specified path is intended
-	data, err := os.ReadFile(path)
+	// Validate and sanitize the path to prevent path traversal attacks
+	cleanPath := filepath.Clean(path)
+
+	// For relative paths, ensure they don't escape the current directory
+	if !filepath.IsAbs(cleanPath) && !filepath.IsLocal(cleanPath) {
+		return nil, fmt.Errorf("invalid path: path escapes local directory")
+	}
+
+	data, err := os.ReadFile(cleanPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read template file: %w", err)
 	}
