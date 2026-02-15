@@ -1,0 +1,84 @@
+# This file is part of the jebel-quant/rhiza-go repository
+# (https://github.com/jebel-quant/rhiza-go).
+#
+# Workflow: Book
+# Purpose: This workflow builds and deploys comprehensive documentation for the project.
+#          It combines Go API documentation, test coverage reports, and test results
+#          into a single GitHub Pages site using mkdocs for presentation.
+#
+# Trigger: This workflow runs on every push to the main or master branch
+#
+# Components:
+#   - 📖 Generate Go API documentation
+#   - 🧪 Run tests and generate coverage reports
+#   - 📚 Build documentation site with mkdocs
+#   - 🚀 Deploy combined documentation to GitHub Pages
+
+name: "(RHIZA) BOOK"
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  book:
+    runs-on: "ubuntu-latest"
+
+    environment:
+      name: github-pages
+
+    permissions:
+      contents: read
+      pages: write            # Permission to deploy to Pages
+      id-token: write         # Permission to verify deployment origin
+
+    steps:
+      # Check out the repository code
+      - uses: actions/checkout@v6.0.2
+        with:
+          lfs: true
+
+      # Set up Go using the version specified in .go-version
+      - name: Set up Go
+        uses: actions/setup-go@v5.3.0
+        with:
+          go-version-file: '.go-version'
+          cache: true
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7.3.0
+        with:
+          version: "0.10.2"
+
+      - name: Configure git auth for private packages
+        uses: ./.github/actions/configure-git-auth
+        with:
+          token: ${{ secrets.GH_PAT }}
+
+      # Install Go dependencies and build tools
+      - name: Install dependencies
+        run: make install
+
+      # Generate the documentation book using the make target
+      - name: "Make the book"
+        run: |
+          make book
+
+      # Step 5: Package all artifacts for GitHub Pages deployment
+      # This prepares the combined outputs for deployment by creating a single artifact
+      - name: Upload static files as artifact
+        uses: actions/upload-pages-artifact@v4.0.0  # Official GitHub Pages artifact upload action
+        with:
+          path: _book/  # Path to the directory containing all artifacts to deploy
+
+      # Step 6: Deploy the packaged artifacts to GitHub Pages
+      # This step publishes the content to GitHub Pages
+      # The deployment is conditional based on whether the repository is a fork and the PUBLISH_COMPANION_BOOK variable is set
+      # If the repository is a fork, deployment is skipped to avoid unauthorised publishing
+      # If PUBLISH_COMPANION_BOOK is not set, it defaults to allowing deployment
+      - name: Deploy to GitHub Pages
+        if: ${{ !github.event.repository.fork && (vars.PUBLISH_COMPANION_BOOK == 'true' || vars.PUBLISH_COMPANION_BOOK == '') }}
+        uses: actions/deploy-pages@v4.0.5  # Official GitHub Pages deployment action
+        continue-on-error: true
