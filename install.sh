@@ -60,13 +60,16 @@ if [ -z "$VERSION" ]; then
 fi
 
 # Construct download URL
+# goreleaser uses Version without the 'v' prefix in archive names
+STRIPPED_VERSION="${VERSION#v}"
+
 if [ "$OS" = "windows" ]; then
   ARCHIVE_EXT="zip"
 else
   ARCHIVE_EXT="tar.gz"
 fi
 
-ARCHIVE_NAME="${BINARY_NAME}_${VERSION}_${OS}_${ARCH}.${ARCHIVE_EXT}"
+ARCHIVE_NAME="${BINARY_NAME}_${STRIPPED_VERSION}_${OS}_${ARCH}.${ARCHIVE_EXT}"
 DOWNLOAD_URL="https://github.com/$REPO_OWNER/$REPO_NAME/releases/download/${VERSION}/${ARCHIVE_NAME}"
 CHECKSUM_URL="https://github.com/$REPO_OWNER/$REPO_NAME/releases/download/${VERSION}/checksums.txt"
 
