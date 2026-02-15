@@ -2,31 +2,12 @@
 # This file provides targets for code quality checks, linting, and formatting.
 
 # Declare phony targets (they don't produce files)
-.PHONY: fmt lint vet tidy check-fmt
+.PHONY: all fmt lint vet tidy
 
 ##@ Quality and Formatting
 
-fmt: install-go ## format Go code
-	@printf "${BLUE}[INFO] Formatting Go code...${RESET}\n"
-	@$(GO_BIN) fmt ./...
-	@gofmt -s -w .
-	@if command -v goimports >/dev/null 2>&1; then \
-	  goimports -w .; \
-	else \
-	  printf "${YELLOW}[WARN] goimports not found, skipping import formatting${RESET}\n"; \
-	fi
-
-check-fmt: install-go ## check if Go code is formatted
-	@printf "${BLUE}[INFO] Checking Go code formatting...${RESET}\n"
-	@UNFORMATTED=$$(gofmt -l .); \
-	if [ -n "$$UNFORMATTED" ]; then \
-	  printf "${RED}[ERROR] The following files are not formatted:${RESET}\n"; \
-	  echo "$$UNFORMATTED"; \
-	  printf "${YELLOW}[INFO] Run 'make fmt' to format them${RESET}\n"; \
-	  exit 1; \
-	else \
-	  printf "${GREEN}[PASS] All Go files are properly formatted${RESET}\n"; \
-	fi
+fmt: install-uv ## run pre-commit hooks for formatting and linting
+	@${UVX_BIN} pre-commit run --all-files
 
 lint: build ## run golangci-lint
 	@printf "${BLUE}[INFO] Running golangci-lint...${RESET}\n"
