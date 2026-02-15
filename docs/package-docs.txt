@@ -1,0 +1,57 @@
+=== github.com/jebel-quant/rhiza-go/cmd/rhiza-go ===
+Command rhiza-go is a starter application demonstrating the rhiza-go template
+structure.
+
+This is example code — replace it with your own application logic. It shows how
+to use the standard Go project layout:
+  - cmd/ for application entry points
+  - pkg/ for public library packages
+  - internal/ for private internal packages
+
+=== github.com/jebel-quant/rhiza-go/internal/utils ===
+package utils // import "github.com/jebel-quant/rhiza-go/internal/utils"
+
+Package utils provides utility functions for the rhiza-go application.
+
+This is starter code — replace or extend it with your own utility functions.
+
+FUNCTIONS
+
+func Contains(slice []string, item string) bool
+    Contains checks if a string slice contains a specific string
+
+func SanitizePath(path string) string
+    SanitizePath sanitizes a file path by removing dangerous characters
+
+
+=== github.com/jebel-quant/rhiza-go/pkg/config ===
+package config // import "github.com/jebel-quant/rhiza-go/pkg/config"
+
+Package config handles loading and managing configuration for the rhiza-go
+application.
+
+This is starter code — replace or extend it with your own configuration logic.
+
+TYPES
+
+type Config struct {
+	Version   string `yaml:"version"`
+	GoVersion string `yaml:"go_version"`
+}
+    Config represents the rhiza-go configuration
+
+func Load() (*Config, error)
+    Load reads configuration from .rhiza/.cfg.toml or returns defaults
+
+type Template struct {
+	Repository string   `yaml:"repository"`
+	Ref        string   `yaml:"ref"`
+	Include    []string `yaml:"include"`
+	Exclude    []string `yaml:"exclude"`
+}
+    Template represents a rhiza template configuration
+
+func LoadTemplate(path string) (*Template, error)
+    LoadTemplate reads template configuration from .rhiza/template.yml
+
+
