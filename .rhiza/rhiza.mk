@@ -38,6 +38,8 @@ RESET := \033[0m
 
 # we need absolute paths!
 INSTALL_DIR ?= $(abspath ./bin)
+UV_BIN ?= $(shell command -v uv 2>/dev/null || echo ${INSTALL_DIR}/uv)
+UVX_BIN ?= $(shell command -v uvx 2>/dev/null || echo ${INSTALL_DIR}/uvx)
 
 # Read Go version from .go-version (single source of truth)
 GO_VERSION ?= $(shell cat .go-version 2>/dev/null || echo "1.23")
