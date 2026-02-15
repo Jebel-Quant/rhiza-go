@@ -12,17 +12,17 @@ import (
 	"path/filepath"
 )
 
-// repoRoot caches the repository root path found by findRepoRoot.
-var repoRoot = findRepoRoot()
+// repoRoot caches the repository root path found by findRepoRootLegacy.
+var repoRoot = findRepoRootLegacy()
 
 // repoPath returns the absolute path to a file relative to the repository root.
 func repoPath(rel string) string {
 	return filepath.Join(repoRoot, rel)
 }
 
-// findRepoRoot returns the root of the repository by walking up from the current
+// findRepoRootLegacy returns the root of the repository by walking up from the current
 // directory looking for go.mod, handling both `go test ./...` and `make rhiza-test`.
-func findRepoRoot() string {
+func findRepoRootLegacy() string {
 	dir, err := os.Getwd()
 	if err != nil {
 		return "."

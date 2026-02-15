@@ -18,7 +18,8 @@ type Config struct {
 	GoVersion string `yaml:"go_version"`
 }
 
-// Load reads configuration from .rhiza/.cfg.toml or returns defaults
+// Load returns a Config with default values and, if present, overrides GoVersion
+// by reading it from a .go-version file in the current directory.
 func Load() (*Config, error) {
 	cfg := &Config{
 		Version:   "0.1.0",
@@ -45,8 +46,15 @@ type Template struct {
 
 // LoadTemplate reads template configuration from .rhiza/template.yml
 func LoadTemplate(path string) (*Template, error) {
-	// #nosec G304 -- Reading template file from specified path is intended
-	data, err := os.ReadFile(path)
+	// Validate and sanitize the path to prevent path traversal attacks
+	cleanPath := filepath.Clean(path)
+
+	// For relative paths, ensure they don't escape the current directory
+	if !filepath.IsAbs(cleanPath) && !filepath.IsLocal(cleanPath) {
+		return nil, fmt.Errorf("invalid path: path escapes local directory")
+	}
+
+	data, err := os.ReadFile(cleanPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read template file: %w", err)
 	}
