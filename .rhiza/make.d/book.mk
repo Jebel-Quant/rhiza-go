@@ -15,6 +15,7 @@ MKDOCS_CONFIG ?= docs/mkdocs.yml
 # Book configuration
 BOOK_TITLE ?= $(shell basename $(PWD))
 BOOK_SUBTITLE ?= Go Project Documentation
+BOOK_TEMPLATE ?= .rhiza/templates/minibook/custom.html.jinja2
 
 ##@ Book
 
@@ -80,6 +81,10 @@ book:: test docs mkdocs-build ## compile the companion documentation book
 	@cat _book/links.json
 
 	@TEMPLATE_ARG=""; \
+	if [ -f "$(BOOK_TEMPLATE)" ]; then \
+	  TEMPLATE_ARG="--template $(BOOK_TEMPLATE)"; \
+	  printf "${BLUE}[INFO] Using book template $(BOOK_TEMPLATE)${RESET}\n"; \
+	fi; \
 	if [ -n "$(LOGO_FILE)" ]; then \
 	  if [ -f "$(LOGO_FILE)" ]; then \
 	    cp "$(LOGO_FILE)" "_book/logo$$(echo $(LOGO_FILE) | sed 's/.*\(\.[^.]*\)$$/\1/')"; \
