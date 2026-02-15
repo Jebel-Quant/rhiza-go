@@ -76,7 +76,7 @@ book:: test docs mkdocs-build ## compile the companion documentation book
 	@TEMPLATE_ARG=""; \
 	if [ -n "$(LOGO_FILE)" ]; then \
 	  if [ -f "$(LOGO_FILE)" ]; then \
-	    cp "$(LOGO_FILE)" "_book/logo$$(echo $(LOGO_FILE) | sed 's/.*\././')"; \
+	    cp "$(LOGO_FILE)" "_book/logo$$(echo $(LOGO_FILE) | sed 's/.*\(\.[^.]*\)$$/\1/')"; \
 	    printf "${BLUE}[INFO] Copying logo: $(LOGO_FILE)${RESET}\n"; \
 	  else \
 	    printf "${YELLOW}[WARN] Logo file $(LOGO_FILE) not found, skipping${RESET}\n"; \
