@@ -18,7 +18,8 @@ type Config struct {
 	GoVersion string `yaml:"go_version"`
 }
 
-// Load reads configuration from .rhiza/.cfg.toml or returns defaults
+// Load returns a Config with default values and, if present, overrides GoVersion
+// by reading it from a .go-version file in the current directory.
 func Load() (*Config, error) {
 	cfg := &Config{
 		Version:   "0.1.0",
