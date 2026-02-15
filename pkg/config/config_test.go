@@ -95,9 +95,6 @@ func TestLoadTemplate_PathTraversal(t *testing.T) {
 			if (err != nil) != tt.wantErr {
 				t.Errorf("LoadTemplate() error = %v, wantErr %v", err, tt.wantErr)
 			}
-			if err == nil && tt.wantErr {
-				t.Error("Expected error but got nil")
-			}
 		})
 	}
 }
