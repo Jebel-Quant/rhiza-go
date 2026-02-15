@@ -106,7 +106,6 @@ func TestLoadTemplate_ValidPaths(t *testing.T) {
 	// Test cases for valid paths that should not be rejected
 	validPaths := []struct {
 		name     string
-		path     string
 		createAt string // relative path within tmpDir
 	}{
 		{
