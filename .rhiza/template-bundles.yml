@@ -16,9 +16,15 @@
 #     .rhiza/make.d/test.mk
 #     docker/Dockerfile
 #     ...
+#
+# Versioning:
+#   The version field below tracks the rhiza-go template version and should
+#   always match the VERSION file at the repository root. This ensures that
+#   downstream projects can reference specific template bundle versions when
+#   syncing from this repository.
 
-# Schema version for this bundles file format
-version: "0.7.1"
+# Template bundle version - aligned with project VERSION
+version: "0.1.0"
 
 # Bundle Definitions
 bundles:
