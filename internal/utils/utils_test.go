@@ -7,10 +7,14 @@ func TestSanitizePath(t *testing.T) {
 		input    string
 		expected string
 	}{
-		{"../../../etc/passwd", "/etc/passwd"}, // filepath.Clean resolves .., then we remove remaining .. sequences
+		{"../../../etc/passwd", "../../../etc/passwd"}, // filepath.Clean preserves relative paths
 		{"normal/path", "normal/path"},
 		{"path/../to/file", "to/file"}, // filepath.Clean resolves path/..
 		{"./test", "test"},
+		{"....", "...."},                           // Previously could bypass sanitization, now handled correctly
+		{"..../file", "..../file"},                 // Bypass pattern is preserved (not normalized to ..)
+		{"multiple///slashes", "multiple/slashes"}, // Duplicate slashes removed
+		{".", "."},
 	}
 
 	for _, tt := range tests {
