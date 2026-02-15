@@ -60,3 +60,44 @@ exclude:
 		t.Errorf("Expected 1 exclude pattern, got %d", len(tmpl.Exclude))
 	}
 }
+
+func TestLoadTemplate_PathTraversal(t *testing.T) {
+	tests := []struct {
+		name    string
+		path    string
+		wantErr bool
+	}{
+		{
+			name:    "absolute path with traversal",
+			path:    "/etc/../../../etc/passwd",
+			wantErr: true,
+		},
+		{
+			name:    "relative path with traversal",
+			path:    "../../../etc/passwd",
+			wantErr: true,
+		},
+		{
+			name:    "path with traversal to parent",
+			path:    "../../secret.txt",
+			wantErr: true,
+		},
+		{
+			name:    "path with complex traversal",
+			path:    "safe/../../unsafe/file.txt",
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := LoadTemplate(tt.path)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("LoadTemplate() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			if err != nil && !tt.wantErr {
+				t.Logf("Expected error but got: %v", err)
+			}
+		})
+	}
+}
