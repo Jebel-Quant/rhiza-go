@@ -49,6 +49,29 @@ func TestTemplateBundlesParses(t *testing.T) {
 	}
 }
 
+// TestTemplateBundlesVersionMatchesProject validates that template-bundles.yml version
+// matches the project VERSION file.
+func TestTemplateBundlesVersionMatchesProject(t *testing.T) {
+	// Read project VERSION file
+	versionPath := repoPath("VERSION")
+	//nolint:gosec // Reading version file is intended
+	versionData, err := os.ReadFile(versionPath)
+	if err != nil {
+		t.Fatalf("failed to read VERSION file: %v", err)
+	}
+	projectVersion := strings.TrimSpace(string(versionData))
+
+	// Load template bundles and get version
+	cfg := loadBundles(t)
+	bundleVersion := strings.TrimSpace(cfg.Version)
+
+	// Versions should match
+	if bundleVersion != projectVersion {
+		t.Errorf("template-bundles.yml version %q does not match project VERSION %q - they should be kept in sync",
+			bundleVersion, projectVersion)
+	}
+}
+
 // TestCoreBundleIsRequired validates that the core bundle is marked as required.
 func TestCoreBundleIsRequired(t *testing.T) {
 	cfg := loadBundles(t)
