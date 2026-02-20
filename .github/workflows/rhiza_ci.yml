@@ -54,6 +54,7 @@ jobs:
       run: make test-race
     
     - name: Run govulncheck
+      if: matrix.go-version == needs.setup.outputs.go-current
       run: |
         go install golang.org/x/vuln/cmd/govulncheck@latest
         govulncheck ./...
