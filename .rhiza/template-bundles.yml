@@ -65,6 +65,7 @@ bundles:
       - renovate.json
 
       # Documentation files (user-facing docs)
+      - docs/API.md
       - docs/SECURITY.md
       - docs/ARCHITECTURE.md
       - docs/CUSTOMIZATION.md
@@ -229,7 +230,7 @@ bundles:
   book:
     description: |
       Documentation book generation combining:
-      - Go API documentation (godoc)
+      - API reference link to pkg.go.dev
       - Test coverage reports
       - Test results
     standalone: false

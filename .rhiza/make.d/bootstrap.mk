@@ -16,6 +16,11 @@ export GO_VERSION
 # Go binary location
 GO_BIN ?= $(shell command -v go 2>/dev/null || echo "go")
 
+# GOPROXY: primary proxy with direct VCS fallback for transient failures or VPN environments.
+# Override with an internal proxy if needed: make install GOPROXY=https://my.proxy.internal,direct
+GOPROXY ?= https://proxy.golang.org,direct
+export GOPROXY
+
 ##@ Bootstrap
 install-uv: ## ensure uv/uvx is installed
 	# Ensure the ${INSTALL_DIR} folder exists
