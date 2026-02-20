@@ -153,7 +153,7 @@ do_release() {
     printf "%b[ERROR] No upstream branch configured for %s%b\n" "$RED" "$CURRENT_BRANCH" "$RESET"
     exit 1
   fi
-
+  
   # Compare local, remote, and merge-base commits to determine sync status
   # LOCAL: current commit on local branch
   # REMOTE: current commit on remote tracking branch
@@ -161,7 +161,7 @@ do_release() {
   LOCAL=$(git rev-parse @)
   REMOTE=$(git rev-parse "$UPSTREAM")
   BASE=$(git merge-base @ "$UPSTREAM")
-
+  
   # Use git revision comparison to detect branch status
   if [ "$LOCAL" != "$REMOTE" ]; then
     if [ "$LOCAL" = "$BASE" ]; then
@@ -206,7 +206,7 @@ do_release() {
     printf "\n%b=== Step 1: Create Tag ===%b\n" "$BLUE" "$RESET"
     printf "Creating tag '%s' for version %s\n" "$TAG" "$CURRENT_VERSION"
     prompt_continue ""
-
+    
     # Check if GPG signing is configured for git commits/tags
     # If user.signingkey is set or commit.gpgsign is true, create a signed tag
     # Signed tags provide cryptographic verification of release authenticity
@@ -235,7 +235,7 @@ do_release() {
   # Step 2: Push the tag to remote
   printf "\n%b=== Step 2: Push Tag to Remote ===%b\n" "$BLUE" "$RESET"
   printf "Pushing tag '%s' to origin will trigger the release workflow.\n" "$TAG"
-
+  
   # Show what commits are in this tag compared to the last tag
   # This helps users understand what changes are included in the release
   LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
@@ -244,7 +244,7 @@ do_release() {
     COMMIT_COUNT=$(git rev-list "$LAST_TAG..$TAG" --count 2>/dev/null || echo "0")
     printf "Commits since %s: %s\n" "$LAST_TAG" "$COMMIT_COUNT"
   fi
-
+  
   prompt_continue ""
 
   # Push only the specific tag (not all tags) to trigger the release workflow

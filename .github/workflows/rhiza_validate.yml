@@ -35,7 +35,7 @@ jobs:
         shell: bash
         run: |
           echo "Skipping rhiza CLI validation for Go template projects"
-
+        
       - name: Run Rhiza Tests
         shell: bash
         run: |

@@ -1,20 +1,28 @@
 ## .rhiza/make.d/docs.mk - Documentation generation
 # This file provides targets for generating documentation.
+# Uses gomarkdoc to generate proper Markdown from Go doc comments.
+# See: https://github.com/princjef/gomarkdoc
 
 # Declare phony targets (they don't produce files)
 .PHONY: docs docs-serve
 
+# gomarkdoc binary
+GOMARKDOC_BIN ?= $(shell command -v gomarkdoc 2>/dev/null || echo "$$($(GO_BIN) env GOPATH)/bin/gomarkdoc")
+
 ##@ Documentation
 
-docs: build ## generate documentation
-	@printf "${BLUE}[INFO] Generating documentation...${RESET}\n"
+docs: build ## generate API documentation as Markdown
+	@printf "${BLUE}[INFO] Generating API documentation...${RESET}\n"
 	@mkdir -p docs
-	@for pkg in $$($(GO_BIN) list ./... 2>/dev/null); do \
-	  printf "=== $$pkg ===\n"; \
-	  $(GO_BIN) doc -all $$pkg 2>/dev/null; \
-	  printf "\n"; \
-	done > docs/package-docs.txt
-	@printf "${BLUE}[INFO] Documentation saved to docs/package-docs.txt${RESET}\n"
+	@if command -v gomarkdoc >/dev/null 2>&1 || [ -x "$(GOMARKDOC_BIN)" ]; then \
+	  $(GOMARKDOC_BIN) --output docs/API.md ./... 2>/dev/null; \
+	  printf "${BLUE}[INFO] API docs saved to docs/API.md${RESET}\n"; \
+	else \
+	  printf "${YELLOW}[WARN] gomarkdoc not found, installing...${RESET}\n"; \
+	  $(GO_BIN) install github.com/princjef/gomarkdoc/cmd/gomarkdoc@latest; \
+	  "$$($(GO_BIN) env GOPATH)/bin/gomarkdoc" --output docs/API.md ./... 2>/dev/null; \
+	  printf "${BLUE}[INFO] API docs saved to docs/API.md${RESET}\n"; \
+	fi
 	@printf "${YELLOW}[INFO] To view documentation in browser, run 'make docs-serve'${RESET}\n"
 
 docs-serve: build ## serve documentation on localhost:6060

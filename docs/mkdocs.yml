@@ -60,6 +60,7 @@ markdown_extensions:
 # Navigation structure
 nav:
   - Home: index.md
+  - API Reference: https://pkg.go.dev/github.com/jebel-quant/rhiza-go
   - Architecture: ARCHITECTURE.md
   - Quick Reference: QUICK_REFERENCE.md
   - Customization: CUSTOMIZATION.md
@@ -69,3 +70,4 @@ nav:
   - DevContainer: DEVCONTAINER.md
   - Demo: DEMO.md
   - Glossary: GLOSSARY.md
+

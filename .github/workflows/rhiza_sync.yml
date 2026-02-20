@@ -86,7 +86,7 @@ jobs:
           git config --global url."https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/".insteadOf "https://github.com/"
 
           git commit -m "chore: Update via rhiza"
-
+          
       - name: Create pull request
         if: >
           (github.event_name == 'schedule' || inputs.create-pr == true)

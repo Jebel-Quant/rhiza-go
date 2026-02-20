@@ -39,7 +39,7 @@ mkdocs-build:: install-uv ## build mkdocs documentation site
 #   name | source index | book-relative index | source dir | book dir
 
 BOOK_SECTIONS := \
-  "API|docs/package-docs.txt|api/index.txt|docs/package-docs.txt|api" \
+  "API|docs/API.md|api/index.md|docs/API.md|api" \
   "Official Documentation|$(MKDOCS_OUTPUT)/index.html|docs/index.html|$(MKDOCS_OUTPUT)|docs" \
   "Coverage|coverage.html|coverage/index.html|.|coverage"
 

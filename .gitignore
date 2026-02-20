@@ -50,6 +50,8 @@ dist/
 _book
 _pdoc
 _mkdocs
+docs/API.md
+docs/package-docs.txt
 
 # Makefile
 local.mk

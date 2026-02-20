@@ -55,7 +55,7 @@ install-go: ## ensure Go is installed at the required version
 
 install: pre-install install-go install-uv ## install Go dependencies
 	@printf "${BLUE}[INFO] Installing Go dependencies...${RESET}\n"
-
+	
 	# Download dependencies
 	@if [ -f "go.mod" ]; then \
 	  $(GO_BIN) mod download || { printf "${RED}[ERROR] Failed to download dependencies${RESET}\n"; exit 1; }; \
@@ -64,14 +64,15 @@ install: pre-install install-go install-uv ## install Go dependencies
 	else \
 	  printf "${YELLOW}[WARN] No go.mod found, skipping install${RESET}\n"; \
 	fi
-
+	
 	# Install development tools
 	@printf "${BLUE}[INFO] Installing development tools...${RESET}\n"
 	@$(GO_BIN) install github.com/golangci/golangci-lint/cmd/golangci-lint@latest || true
 	@$(GO_BIN) install golang.org/x/tools/cmd/goimports@latest || true
 	@$(GO_BIN) install golang.org/x/vuln/cmd/govulncheck@latest || true
 	@$(GO_BIN) install github.com/securego/gosec/v2/cmd/gosec@latest || true
-
+	@$(GO_BIN) install github.com/princjef/gomarkdoc/cmd/gomarkdoc@latest || true
+	
 	@$(MAKE) post-install
 
 build: install ## build Go binaries
@@ -83,7 +84,7 @@ build: install ## build Go binaries
 
 clean: ## Clean project artifacts and stale local branches
 	@printf "%bCleaning project...%b\n" "$(BLUE)" "$(RESET)"
-
+	
 	# Clean Go build cache and test cache
 	@$(GO_BIN) clean -cache -testcache -modcache || true
 
@@ -91,7 +92,7 @@ clean: ## Clean project artifacts and stale local branches
 	@git clean -d -X -f \
 		-e '!.env' \
 		-e '!.env.*'
-
+	
 	# Remove build artifacts
 	@rm -rf \
 		dist \
@@ -100,9 +101,9 @@ clean: ## Clean project artifacts and stale local branches
 		coverage.html \
 		*.test \
 		*.prof
-
+	
 	@printf "%bRemoving local branches with no remote counterpart...%b\n" "$(BLUE)" "$(RESET)"
-
+	
 	@git fetch --prune
-
+	
 	@git branch -vv | awk '/: gone]/{print $$1}' | xargs -r git branch -D

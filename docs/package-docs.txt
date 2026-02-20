@@ -21,7 +21,15 @@ func Contains(slice []string, item string) bool
     Contains checks if a string slice contains a specific string
 
 func SanitizePath(path string) string
-    SanitizePath sanitizes a file path by removing dangerous characters
+    SanitizePath normalizes a file path using filepath.Clean.
+
+    Note: This does NOT prevent directory traversal attacks. The function
+    preserves relative path components (like ../../../etc/passwd). Callers must
+    validate the result is within allowed directories if security is a concern.
+
+    For secure path handling, use filepath.Join with a base directory and verify
+    the result with filepath.Rel or strings.HasPrefix to ensure it stays within
+    bounds.
 
 
 === github.com/jebel-quant/rhiza-go/pkg/config ===
@@ -41,7 +49,8 @@ type Config struct {
     Config represents the rhiza-go configuration
 
 func Load() (*Config, error)
-    Load reads configuration from .rhiza/.cfg.toml or returns defaults
+    Load returns a Config with default values and, if present, overrides
+    GoVersion by reading it from a .go-version file in the current directory.
 
 type Template struct {
 	Repository string   `yaml:"repository"`
@@ -53,3 +62,5 @@ type Template struct {
 
 func LoadTemplate(path string) (*Template, error)
     LoadTemplate reads template configuration from .rhiza/template.yml
+
+

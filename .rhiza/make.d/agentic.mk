@@ -68,3 +68,4 @@ install-claude:  ## checks for claude and prompts to install
 			printf "${BLUE}[INFO] Skipping installation.${RESET}\n"; \
 		fi; \
 	fi
+

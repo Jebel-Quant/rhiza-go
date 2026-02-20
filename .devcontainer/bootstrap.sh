@@ -25,13 +25,11 @@ echo "export PATH=\"\$(go env GOPATH)/bin:\$PATH\"" >> ~/.bashrc
 # Install dependencies and development tools
 make install
 
-# Use INSTALL_DIR from environment or default to local bin
-# In devcontainer, this is set to /home/vscode/.local/bin to avoid conflict with host
-export INSTALL_DIR="${INSTALL_DIR:-./bin}"
-export UVX_BIN="${INSTALL_DIR}/uvx"
-
 # Initialize pre-commit hooks if configured
 if [ -f .pre-commit-config.yaml ]; then
-  # uvx runs tools without requiring them in the project deps
-  "$UVX_BIN" pre-commit install
+    if command -v pre-commit &>/dev/null; then
+        pre-commit install
+    else
+        echo "Note: pre-commit not found, skipping hook installation"
+    fi
 fi

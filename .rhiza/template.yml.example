@@ -16,19 +16,19 @@ include: |
   .golangci.yml
   .editorconfig
   .gitignore
-
+  
   # Makefile and build system
   Makefile
   .rhiza/rhiza.mk
   .rhiza/make.d/*.mk
-
+  
   # CI/CD workflows
   .github/workflows/go_ci.yml
   .github/workflows/go_release.yml
-
+  
   # Pre-commit hooks
   .pre-commit-config.yaml
-
+  
   # Documentation templates
   CODE_OF_CONDUCT.md
   CONTRIBUTING.md
@@ -38,19 +38,19 @@ include: |
 exclude: |
   # Protect custom scripts
   .rhiza/scripts/custom/*
-
+  
   # Protect local development files
   local.mk
   .env
-
+  
   # Protect your actual code
   cmd/**
   pkg/**
   internal/**
-
+  
   # Protect your tests
   *_test.go
-
+  
   # Protect Go module files (managed by go mod)
   go.mod
   go.sum
