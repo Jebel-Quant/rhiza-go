@@ -70,23 +70,16 @@ install: pre-install install-go install-uv ## install Go dependencies
 	  printf "${YELLOW}[WARN] No go.mod found, skipping install${RESET}\n"; \
 	fi
 	
-	# Install development tools
+	# Install development tools (run outside module dir to avoid go.mod/go.sum interaction)
 	@printf "${BLUE}[INFO] Installing development tools...${RESET}\n"
-	@$(GO_BIN) install github.com/golangci/golangci-lint/cmd/golangci-lint@latest || true
-	@$(GO_BIN) install golang.org/x/tools/cmd/goimports@latest || true
-	@$(GO_BIN) install golang.org/x/vuln/cmd/govulncheck@latest || true
-	@$(GO_BIN) install github.com/securego/gosec/v2/cmd/gosec@latest || true
-	@$(GO_BIN) install gotest.tools/gotestsum@latest || true
-	@$(GO_BIN) install github.com/princjef/gomarkdoc/cmd/gomarkdoc@latest || true
-	@if ! command -v syft >/dev/null 2>&1; then \
-	  printf "${BLUE}[INFO] Installing syft...${RESET}\n"; \
-	  curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b "$$($(GO_BIN) env GOPATH)/bin" || true; \
-	fi
-	@if ! command -v goreleaser >/dev/null 2>&1; then \
-	  printf "${BLUE}[INFO] Installing goreleaser...${RESET}\n"; \
-	  curl -sSfL https://goreleaser.com/static/run | GOPATH="$$($(GO_BIN) env GOPATH)" bash -s -- version --stable 2>/dev/null || \
-	  $(GO_BIN) install github.com/goreleaser/goreleaser/v2@latest || true; \
-	fi
+	@cd /tmp && $(GO_BIN) install github.com/golangci/golangci-lint/cmd/golangci-lint@latest || true
+	@cd /tmp && $(GO_BIN) install golang.org/x/tools/cmd/goimports@latest || true
+	@cd /tmp && $(GO_BIN) install golang.org/x/vuln/cmd/govulncheck@latest || true
+	@cd /tmp && $(GO_BIN) install github.com/securego/gosec/v2/cmd/gosec@latest || true
+	@cd /tmp && $(GO_BIN) install gotest.tools/gotestsum@latest || true
+	@cd /tmp && $(GO_BIN) install github.com/princjef/gomarkdoc/cmd/gomarkdoc@latest || true
+	@cd /tmp && $(GO_BIN) install github.com/goreleaser/goreleaser/v2@latest || true
+	@curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b "$$($(GO_BIN) env GOPATH)/bin" || true
 	
 	@$(MAKE) post-install
 
