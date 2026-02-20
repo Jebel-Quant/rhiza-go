@@ -25,7 +25,7 @@ mkdocs-build:: install-uv ## build mkdocs documentation site
 	@if [ -f "$(MKDOCS_CONFIG)" ]; then \
 	  rm -rf "$(MKDOCS_OUTPUT)"; \
 	  MKDOCS_OUTPUT_ABS="$$(pwd)/$(MKDOCS_OUTPUT)"; \
-	  $(UVX_BIN) --with mkdocs-material --with "pymdown-extensions>=10.0" mkdocs build \
+	  $(UVX_BIN) --from "mkdocs<2" --with "mkdocs-material<9.6" --with "pymdown-extensions>=10.0" mkdocs build \
 	    -f "$(MKDOCS_CONFIG)" \
 	    -d "$$MKDOCS_OUTPUT_ABS"; \
 	else \
@@ -38,10 +38,13 @@ mkdocs-build:: install-uv ## build mkdocs documentation site
 # format:
 #   name | source index | book-relative index | source dir | book dir
 
+# Module path for external API link
+GO_MODULE ?= $(shell grep '^module ' go.mod | awk '{print $$2}')
+
 BOOK_SECTIONS := \
-  "API|docs/API.md|api/index.md|docs/API.md|api" \
   "Official Documentation|$(MKDOCS_OUTPUT)/index.html|docs/index.html|$(MKDOCS_OUTPUT)|docs" \
-  "Coverage|coverage.html|coverage/index.html|.|coverage"
+  "Test Report|test-report.html|tests/index.html|test-report.html|tests" \
+  "Coverage|coverage.html|coverage/index.html|coverage.html|coverage"
 
 # The 'book' target assembles documentation from available sources.
 # 1. Aggregates Go documentation, coverage reports, and test results into _book.
@@ -51,7 +54,8 @@ book:: test docs mkdocs-build ## compile the companion documentation book
 	@rm -rf _book && mkdir -p _book
 
 	@printf "{\n" > _book/links.json
-	@first=1; \
+	@printf '  "API": "https://pkg.go.dev/%s"' "$(GO_MODULE)" >> _book/links.json
+	@first=0; \
 	for entry in $(BOOK_SECTIONS); do \
 	  name=$${entry%%|*}; \
 	  rest=$${entry#*|}; \

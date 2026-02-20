@@ -14,6 +14,11 @@
 coverage.html
 coverage.txt
 
+# Output of the go test -json command
+test-output.json
+test-report.html
+test-report.xml
+
 # Go workspace file
 go.work
 go.work.sum

@@ -1,28 +1,36 @@
 ## .rhiza/make.d/docs.mk - Documentation generation
 # This file provides targets for generating documentation.
-# Uses gomarkdoc to generate proper Markdown from Go doc comments.
-# See: https://github.com/princjef/gomarkdoc
+# API docs link to pkg.go.dev for the canonical Go documentation.
 
 # Declare phony targets (they don't produce files)
 .PHONY: docs docs-serve
 
-# gomarkdoc binary
-GOMARKDOC_BIN ?= $(shell command -v gomarkdoc 2>/dev/null || echo "$$($(GO_BIN) env GOPATH)/bin/gomarkdoc")
+# Module path from go.mod
+GO_MODULE ?= $(shell grep '^module ' go.mod | awk '{print $$2}')
 
 ##@ Documentation
 
 docs: build ## generate API documentation as Markdown
 	@printf "${BLUE}[INFO] Generating API documentation...${RESET}\n"
 	@mkdir -p docs
-	@if command -v gomarkdoc >/dev/null 2>&1 || [ -x "$(GOMARKDOC_BIN)" ]; then \
-	  $(GOMARKDOC_BIN) --output docs/API.md ./... 2>/dev/null; \
-	  printf "${BLUE}[INFO] API docs saved to docs/API.md${RESET}\n"; \
-	else \
-	  printf "${YELLOW}[WARN] gomarkdoc not found, installing...${RESET}\n"; \
-	  $(GO_BIN) install github.com/princjef/gomarkdoc/cmd/gomarkdoc@latest; \
-	  "$$($(GO_BIN) env GOPATH)/bin/gomarkdoc" --output docs/API.md ./... 2>/dev/null; \
-	  printf "${BLUE}[INFO] API docs saved to docs/API.md${RESET}\n"; \
-	fi
+	@printf '%s\n' \
+	  "# API Reference" \
+	  "" \
+	  "Full API documentation is available on pkg.go.dev:" \
+	  "" \
+	  "**[pkg.go.dev/$(GO_MODULE)](https://pkg.go.dev/$(GO_MODULE))**" \
+	  "" \
+	  "## Packages" \
+	  "" \
+	  "| Package | Description |" \
+	  "|---------|-------------|" \
+	  > docs/API.md
+	@for pkg in $$($(GO_BIN) list ./... 2>/dev/null | grep -v '/.rhiza/'); do \
+	  desc=$$($(GO_BIN) doc "$$pkg" 2>/dev/null | awk '/^(Package|Command) /{sub(/^[^ ]+ [^ ]+ /,""); print; exit}'); \
+	  short=$${pkg#$(GO_MODULE)/}; \
+	  printf '| [%s](https://pkg.go.dev/%s) | %s |\n' "$$short" "$$pkg" "$$desc" >> docs/API.md; \
+	done
+	@printf "${BLUE}[INFO] API docs saved to docs/API.md${RESET}\n"
 	@printf "${YELLOW}[INFO] To view documentation in browser, run 'make docs-serve'${RESET}\n"
 
 docs-serve: build ## serve documentation on localhost:6060

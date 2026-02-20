@@ -95,16 +95,27 @@ sync: pre-sync ## sync with template repository as defined in .rhiza/template.ym
 	@if git remote get-url origin 2>/dev/null | grep -iqE 'jebel-quant/rhiza-go(\.git)?$$'; then \
 		printf "${BLUE}[INFO] Skipping sync in rhiza-go repository (no template.yml by design)${RESET}\n"; \
 	else \
-		printf "${YELLOW}[WARN] Sync functionality requires rhiza CLI tool${RESET}\n"; \
-		printf "${YELLOW}[INFO] Install with: go install github.com/Jebel-Quant/rhiza@latest${RESET}\n"; \
+		$(MAKE) install-uv; \
+		${UVX_BIN} "rhiza>=$(RHIZA_VERSION)" materialize --force .; \
 	fi
 	@$(MAKE) post-sync
 
-summarise-sync: ## summarise differences created by sync with template repository
+sync-experimental: pre-sync ## sync with template repository using cruft-based merge (experimental, requires rhiza-cli >= 0.11.1-beta.1)
+	@printf "${YELLOW}[WARN] sync-experimental uses a beta version of rhiza-cli (>= 0.11.1-beta.1) and is not yet stable${RESET}\n"
 	@if git remote get-url origin 2>/dev/null | grep -iqE 'jebel-quant/rhiza-go(\.git)?$$'; then \
-		printf "${BLUE}[INFO] Skipping summarise-sync in rhiza-go repository (no template.yml by design)${RESET}\n"; \
+		printf "${BLUE}[INFO] Skipping sync-experimental in rhiza repository (no template.yml by design)${RESET}\n"; \
 	else \
-		printf "${YELLOW}[WARN] Sync functionality requires rhiza CLI tool${RESET}\n"; \
+		$(MAKE) install-uv; \
+		${UVX_BIN} "rhiza>=$(RHIZA_VERSION)" sync .; \
+	fi
+	@$(MAKE) post-sync
+
+summarise-sync: install-uv ## summarise differences created by sync with template repository
+	@if git remote get-url origin 2>/dev/null | grep -iqE 'jebel-quant/rhiza-go(\.git)?$$'; then \
+		printf "${BLUE}[INFO] Skipping summarise-sync in rhiza repository (no template.yml by design)${RESET}\n"; \
+	else \
+		$(MAKE) install-uv; \
+		${UVX_BIN} "rhiza>=$(RHIZA_VERSION)" summarise .; \
 	fi
 
 rhiza-test: install ## run rhiza's own tests (if any)
@@ -135,8 +146,8 @@ validate: pre-validate rhiza-test ## validate project structure against template
 	fi
 	@$(MAKE) post-validate
 
-readme: ## update README.md with current Makefile help output
-	@printf "${YELLOW}[WARN] README update functionality requires rhiza-tools${RESET}\n"
+readme: install-uv ## update README.md with current Makefile help output
+	@${UVX_BIN} "rhiza-tools>=0.2.0" update-readme
 
 ##@ Meta
 
@@ -146,9 +157,6 @@ help: print-logo ## Display this help message
 	+@printf "$(BOLD)Targets:$(RESET)\n"
 	+@awk 'BEGIN {FS = ":.*##"; printf ""} /^[a-zA-Z_-]+:.*?##/ { printf "  $(BLUE)%-20s$(RESET) %s\n", $$1, $$2 } /^##@/ { printf "\n$(BOLD)%s$(RESET)\n", substr($$0, 5) }' $(MAKEFILE_LIST)
 	+@printf "\n"
-
-version-matrix: ## Emit the list of supported Go versions from .go-version
-	@printf "${BLUE}[INFO] Supported Go version: $(GO_VERSION)${RESET}\n"
 
 print-% : ## print the value of a variable (usage: make print-VARIABLE)
 	@printf "${BLUE}[INFO] Printing value of variable '$*':${RESET}\n"

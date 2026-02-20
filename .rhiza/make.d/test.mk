@@ -8,11 +8,23 @@
 # Minimum coverage percent for tests to pass
 COVERAGE_THRESHOLD ?= 80
 
+# gotestsum binary
+GOTESTSUM_BIN ?= $(shell command -v gotestsum 2>/dev/null || echo "$$($(GO_BIN) env GOPATH)/bin/gotestsum")
+
 ##@ Development and Testing
 
 test: build ## run all tests
 	@printf "${BLUE}[INFO] Running tests...${RESET}\n"
-	@$(GO_BIN) test ./... -v -cover
+	@$(GOTESTSUM_BIN) --format testname \
+	  --junitfile test-report.xml \
+	  --jsonfile test-output.json \
+	  -- ./... -coverprofile=coverage.out; \
+	  TEST_EXIT=$$?; \
+	  $(UVX_BIN) junit2html --theme dark test-report.xml test-report.html; \
+	  $(GO_BIN) tool cover -html=coverage.out -o coverage.html 2>/dev/null || true; \
+	  printf "${BLUE}[INFO] Coverage report: coverage.html${RESET}\n"; \
+	  printf "${BLUE}[INFO] Test report: test-report.html${RESET}\n"; \
+	  exit $$TEST_EXIT
 
 test-verbose: build ## run tests with verbose output
 	@printf "${BLUE}[INFO] Running tests with verbose output...${RESET}\n"

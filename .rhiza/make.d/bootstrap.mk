@@ -71,7 +71,7 @@ install: pre-install install-go install-uv ## install Go dependencies
 	@$(GO_BIN) install golang.org/x/tools/cmd/goimports@latest || true
 	@$(GO_BIN) install golang.org/x/vuln/cmd/govulncheck@latest || true
 	@$(GO_BIN) install github.com/securego/gosec/v2/cmd/gosec@latest || true
-	@$(GO_BIN) install github.com/princjef/gomarkdoc/cmd/gomarkdoc@latest || true
+	@$(GO_BIN) install gotest.tools/gotestsum@latest || true
 	
 	@$(MAKE) post-install
 
@@ -99,6 +99,9 @@ clean: ## Clean project artifacts and stale local branches
 		build \
 		coverage.out \
 		coverage.html \
+		test-output.json \
+		test-report.xml \
+		test-report.html \
 		*.test \
 		*.prof
 	
