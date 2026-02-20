@@ -24,7 +24,7 @@
 #   syncing from this repository.
 
 # Template bundle version - aligned with project VERSION
-version: "0.1.0"
+version: "0.2.0"
 
 # Bundle Definitions
 bundles:
