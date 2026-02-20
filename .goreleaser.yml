@@ -43,6 +43,10 @@ archives:
 checksum:
   name_template: 'checksums.txt'
 
+source:
+  enabled: true
+  name_template: '{{ .ProjectName }}-{{ .Version }}'
+
 sboms:
   - id: source
     artifacts: source
