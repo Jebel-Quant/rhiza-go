@@ -78,12 +78,12 @@ brews:
     repository:
       owner: Jebel-Quant
       name: homebrew-tap
-      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+      token: '{{ index .Env "HOMEBREW_TAP_TOKEN" }}'
     directory: Formula
     homepage: "https://github.com/Jebel-Quant/rhiza-go"
     description: "Strong roots for Go projects - reusable configuration templates for modern Go development"
     license: "MIT"
-    skip_upload: '{{ if eq .Env.HOMEBREW_TAP_TOKEN "" }}true{{ else }}auto{{ end }}'
+    skip_upload: '{{ if index .Env "HOMEBREW_TAP_TOKEN" }}auto{{ else }}true{{ end }}'
     install: |
       bin.install "rhiza-go"
     test: |
