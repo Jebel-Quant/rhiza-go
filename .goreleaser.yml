@@ -43,6 +43,18 @@ archives:
 checksum:
   name_template: 'checksums.txt'
 
+sboms:
+  - id: source
+    artifacts: source
+    documents:
+      - sbom.cdx.json
+    cmd: syft
+    args:
+      - scan
+      - "."
+      - -o
+      - cyclonedx-json=${document}
+
 changelog:
   sort: asc
   filters:

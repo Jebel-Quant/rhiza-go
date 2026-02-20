@@ -3,21 +3,15 @@
 #
 # Release Workflow for Go Packages with Optional Devcontainer Publishing
 #
-# This workflow implements a secure, maintainable release pipeline with distinct phases:
-#
 # 📋 Pipeline Phases:
-#   1. 🔍 Validate Tag - Check tag format and ensure release doesn't already exist
-#   2. 🏗️ Build - Build Go binaries for multiple platforms via goreleaser
-#   3. 📦 Generate SBOM - Create Software Bill of Materials (CycloneDX format)
-#   4. 📝 Draft Release - Created by goreleaser with build artifacts and checksums
-#   5. 🐳 Publish Devcontainer - Build and publish devcontainer image (conditional)
-#   6. ✅ Finalize Release - Publish the GitHub release
+#   1. 🏗️  Build - GoReleaser builds binaries, generates SBOM (via syft), creates draft release
+#   2. 🐳 Publish Devcontainer - Build and publish devcontainer image (conditional)
+#   3. ✅ Finalise Release - Publish the GitHub draft release
 #
 # 📦 SBOM Generation:
-#   - Generated using syft
-#   - Creates CycloneDX format for software supply chain security
+#   - Handled natively by GoReleaser using syft (cyclonedx-json format)
 #   - SBOM attestations are created and stored (public repos only)
-#   - Attached to GitHub releases for transparency and compliance
+#   - Attached to GitHub releases automatically by GoReleaser
 #
 # 🐳 Devcontainer Publishing:
 #   - Only occurs when PUBLISH_DEVCONTAINER repository variable is set to "true"
@@ -25,8 +19,6 @@
 #   - Uses the release tag (e.g., v1.2.3) as the image tag
 #   - Image name: {registry}/{owner}/{repository}/devcontainer
 #   - Registry defaults to ghcr.io (override with DEVCONTAINER_REGISTRY variable)
-#   - Config file: Always .devcontainer/devcontainer.json
-#   - Adds devcontainer image link to GitHub release notes
 #
 # 🔐 Security:
 #   - Container registry uses GITHUB_TOKEN for authentication
@@ -44,10 +36,6 @@
 #   Create and push a version tag:
 #     git tag v0.1.0
 #     git push origin v0.1.0
-#
-# 🎯 For repos without devcontainers:
-#   The workflow gracefully skips devcontainer steps if PUBLISH_DEVCONTAINER is not
-#   set to "true" or .devcontainer directory doesn't exist.
 
 
 name: (RHIZA) RELEASE
@@ -64,42 +52,9 @@ permissions:
   attestations: write   # Needed for SLSA provenance attestations (public repos only)
 
 jobs:
-  tag:
-    name: Validate Tag
-    runs-on: ubuntu-latest
-    outputs:
-      tag: ${{ steps.set_tag.outputs.tag }}
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v6.0.2
-        with:
-          fetch-depth: 0
-
-      - name: Set Tag Variable
-        id: set_tag
-        run: |
-          TAG="${GITHUB_REF#refs/tags/}"
-          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-
-      - name: Validate Release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG: ${{ steps.set_tag.outputs.tag }}
-        run: |
-          if gh release view "$TAG" >/dev/null 2>&1; then
-            DRAFT_STATUS=$(gh release view "$TAG" --json isDraft --jq '.isDraft')
-            if [ "$DRAFT_STATUS" != "true" ]; then
-              echo "::error::Release '$TAG' already exists and is not a draft. Please use a new tag."
-              exit 1
-            else
-              echo "::warning::Release '$TAG' exists as a draft. Will proceed to update it."
-            fi
-          fi
-
   build:
     name: Build & Draft Release
     runs-on: ubuntu-latest
-    needs: tag
     steps:
       - name: Checkout Code
         uses: actions/checkout@v6.0.2
@@ -114,7 +69,7 @@ jobs:
 
       - name: Verify version matches tag
         run: |
-          TAG_VERSION="${{ needs.tag.outputs.tag }}"
+          TAG_VERSION="${{ github.ref_name }}"
           TAG_VERSION=${TAG_VERSION#v}
           FILE_VERSION=$(cat VERSION | tr -d '[:space:]')
 
@@ -129,37 +84,17 @@ jobs:
         with:
           version: '~> v2'
           args: release --clean
+          install-syft: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
-
-      - name: Install syft for SBOM generation
-        run: |
-          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
-
-      - name: Generate SBOM (CycloneDX)
-        run: |
-          printf "[INFO] Generating SBOM in CycloneDX format...\n"
-          syft scan . -o cyclonedx-json=sbom.cdx.json
-          syft scan . -o cyclonedx-xml=sbom.cdx.xml
-          printf "[INFO] SBOM generation complete\n"
-          printf "Generated files:\n"
-          ls -lh sbom.cdx.*
 
       - name: Attest SBOM
         if: github.event.repository.private == false
         uses: actions/attest-sbom@v3
         with:
-          subject-path: sbom.cdx.json
-          sbom-path: sbom.cdx.json
-
-      - name: Upload SBOM artifacts
-        uses: actions/upload-artifact@v6.0.0
-        with:
-          name: sbom
-          path: |
-            sbom.cdx.json
-            sbom.cdx.xml
+          subject-path: dist/sbom.cdx.json
+          sbom-path: dist/sbom.cdx.json
 
       - name: Generate SLSA provenance attestations
         if: github.event.repository.private == false
@@ -167,21 +102,11 @@ jobs:
         with:
           subject-path: dist/*
 
-      - name: Upload release SBOM to draft
-        uses: softprops/action-gh-release@v2.5.0
-        with:
-          tag_name: ${{ needs.tag.outputs.tag }}
-          draft: true
-          append_body: true
-          files: |
-            sbom.cdx.json
-            sbom.cdx.xml
-
   devcontainer:
     name: Publish Devcontainer Image
     runs-on: ubuntu-latest
     environment: release
-    needs: [tag, build]
+    needs: build
     outputs:
       should_publish: ${{ steps.check_publish.outputs.should_publish }}
       image_name: ${{ steps.image_name.outputs.image_name }}
@@ -263,12 +188,12 @@ jobs:
           configFile: .devcontainer/devcontainer.json
           push: always
           imageName: ${{ steps.image_name.outputs.image_name }}
-          imageTag: ${{ needs.tag.outputs.tag }}
+          imageTag: ${{ github.ref_name }}
 
   finalise-release:
     name: Finalise Release
     runs-on: ubuntu-latest
-    needs: [tag, devcontainer]
+    needs: devcontainer
     if: needs.devcontainer.result == 'success' || needs.devcontainer.result == 'skipped'
     steps:
       - name: Checkout Code
@@ -280,7 +205,7 @@ jobs:
         id: devcontainer_link
         if: needs.devcontainer.outputs.should_publish == 'true' && needs.devcontainer.result == 'success'
         run: |
-          FULL_IMAGE="${{ needs.devcontainer.outputs.image_name }}:${{ needs.tag.outputs.tag }}"
+          FULL_IMAGE="${{ needs.devcontainer.outputs.image_name }}:${{ github.ref_name }}"
           {
             echo "message<<EOF"
             echo "### Devcontainer Image"
@@ -292,7 +217,7 @@ jobs:
       - name: Publish Release
         uses: softprops/action-gh-release@v2.5.0
         with:
-          tag_name: ${{ needs.tag.outputs.tag }}
+          tag_name: ${{ github.ref_name }}
           draft: false
           append_body: true
           body: |

@@ -30,7 +30,7 @@ check-fmt: install-go ## check if Go code is formatted
 	  printf "${GREEN}[PASS] All Go files are properly formatted${RESET}\n"; \
 	fi
 
-lint: build ## run golangci-lint
+lint: build ## run golangci-lint and goreleaser config check
 	@printf "${BLUE}[INFO] Running golangci-lint...${RESET}\n"
 	@if command -v golangci-lint >/dev/null 2>&1; then \
 	  golangci-lint run ./...; \
@@ -40,6 +40,16 @@ lint: build ## run golangci-lint
 	  printf "${YELLOW}[WARN] golangci-lint not found, attempting to install...${RESET}\n"; \
 	  $(GO_BIN) install github.com/golangci/golangci-lint/cmd/golangci-lint@latest; \
 	  $(shell go env GOPATH)/bin/golangci-lint run ./...; \
+	fi
+	@if [ -f .goreleaser.yml ] || [ -f .goreleaser.yaml ]; then \
+	  printf "${BLUE}[INFO] Checking GoReleaser config...${RESET}\n"; \
+	  if command -v goreleaser >/dev/null 2>&1; then \
+	    goreleaser check --quiet && printf "${GREEN}[PASS] .goreleaser.yml is valid${RESET}\n"; \
+	  elif [ -x "$$($(GO_BIN) env GOPATH)/bin/goreleaser" ]; then \
+	    "$$($(GO_BIN) env GOPATH)/bin/goreleaser" check --quiet && printf "${GREEN}[PASS] .goreleaser.yml is valid${RESET}\n"; \
+	  else \
+	    printf "${YELLOW}[WARN] goreleaser not found, skipping config check${RESET}\n"; \
+	  fi; \
 	fi
 
 vet: build ## run go vet

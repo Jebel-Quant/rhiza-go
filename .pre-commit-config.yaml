@@ -38,3 +38,12 @@ repos:
     rev: v1.7.10
     hooks:
       - id: actionlint
+
+  - repo: local
+    hooks:
+      - id: goreleaser-check
+        name: goreleaser check
+        language: system
+        entry: goreleaser check --quiet
+        files: \.goreleaser\.ya?ml$
+        pass_filenames: false

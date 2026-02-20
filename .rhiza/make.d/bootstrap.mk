@@ -78,6 +78,15 @@ install: pre-install install-go install-uv ## install Go dependencies
 	@$(GO_BIN) install github.com/securego/gosec/v2/cmd/gosec@latest || true
 	@$(GO_BIN) install gotest.tools/gotestsum@latest || true
 	@$(GO_BIN) install github.com/princjef/gomarkdoc/cmd/gomarkdoc@latest || true
+	@if ! command -v syft >/dev/null 2>&1; then \
+	  printf "${BLUE}[INFO] Installing syft...${RESET}\n"; \
+	  curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b "$$($(GO_BIN) env GOPATH)/bin" || true; \
+	fi
+	@if ! command -v goreleaser >/dev/null 2>&1; then \
+	  printf "${BLUE}[INFO] Installing goreleaser...${RESET}\n"; \
+	  curl -sSfL https://goreleaser.com/static/run | GOPATH="$$($(GO_BIN) env GOPATH)" bash -s -- version --stable 2>/dev/null || \
+	  $(GO_BIN) install github.com/goreleaser/goreleaser/v2@latest || true; \
+	fi
 	
 	@$(MAKE) post-install
 

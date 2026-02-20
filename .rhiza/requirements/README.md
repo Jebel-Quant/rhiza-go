@@ -25,6 +25,8 @@ Development tools are installed via `make install`:
 - `golangci-lint` — Linting
 - `goimports` — Import formatting
 - `gomarkdoc` — API documentation generator (produces self-contained Markdown)
+- `goreleaser` — Release automation; `goreleaser check` runs in `make lint` and pre-commit
+- `syft` — SBOM generation (CycloneDX format, used by GoReleaser)
 - `pkgsite` — Interactive local documentation browser (`make docs-serve`)
 
 ## CI/CD
