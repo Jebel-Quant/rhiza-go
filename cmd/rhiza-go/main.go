@@ -9,21 +9,30 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/jebel-quant/rhiza-go/pkg/config"
 )
 
 func main() {
-	fmt.Println("Rhiza-Go - Template System for Go Projects")
-	fmt.Println("=============================================")
+	if err := run(os.Stdout); err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		os.Exit(1)
+	}
+}
+
+// run executes the application logic, writing output to w.
+func run(w io.Writer) error {
+	fmt.Fprintln(w, "Rhiza-Go - Template System for Go Projects")
+	fmt.Fprintln(w, "=============================================")
 
 	cfg, err := config.Load()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error loading configuration: %v\n", err)
-		os.Exit(1)
+		return fmt.Errorf("loading configuration: %w", err)
 	}
 
-	fmt.Printf("Version: %s\n", cfg.Version)
-	fmt.Printf("Go Version: %s\n", cfg.GoVersion)
+	fmt.Fprintf(w, "Version: %s\n", cfg.Version)
+	fmt.Fprintf(w, "Go Version: %s\n", cfg.GoVersion)
+	return nil
 }
