@@ -12,6 +12,8 @@ fmt: install-go ## format Go code
 	@gofmt -s -w .
 	@if command -v goimports >/dev/null 2>&1; then \
 	  goimports -w .; \
+	elif [ -x "$$($(GO_BIN) env GOPATH)/bin/goimports" ]; then \
+	  "$$($(GO_BIN) env GOPATH)/bin/goimports" -w .; \
 	else \
 	  printf "${YELLOW}[WARN] goimports not found, skipping import formatting${RESET}\n"; \
 	fi
