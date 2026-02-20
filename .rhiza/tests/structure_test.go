@@ -47,7 +47,6 @@ func TestRequiredDirectoriesExist(t *testing.T) {
 		{"internal", "Private internal packages"},
 		{".rhiza", "Rhiza configuration directory"},
 		{".rhiza/make.d", "Makefile includes directory"},
-		{".rhiza/scripts", "Scripts directory"},
 		{".rhiza/tests", "Template tests directory"},
 		{"docs", "Documentation directory"},
 	}
