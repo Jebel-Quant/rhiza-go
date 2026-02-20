@@ -24,7 +24,8 @@ Development tools are installed via `make install`:
 
 - `golangci-lint` — Linting
 - `goimports` — Import formatting
-- `godoc` — Documentation server
+- `gomarkdoc` — API documentation generator (produces self-contained Markdown)
+- `pkgsite` — Interactive local documentation browser (`make docs-serve`)
 
 ## CI/CD
 

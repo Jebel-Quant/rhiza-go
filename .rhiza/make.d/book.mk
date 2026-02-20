@@ -41,6 +41,10 @@ mkdocs-build:: install-uv ## build mkdocs documentation site
 # Module path for external API link
 GO_MODULE ?= $(shell grep '^module ' go.mod | awk '{print $$2}')
 
+# Optional: set to your project's official documentation URL to include it in the book navigation.
+# e.g. OFFICIAL_DOCS_URL = https://myproject.example.com
+OFFICIAL_DOCS_URL ?=
+
 BOOK_SECTIONS := \
   "Official Documentation|$(MKDOCS_OUTPUT)/index.html|docs/index.html|$(MKDOCS_OUTPUT)|docs" \
   "Test Report|test-report.html|tests/index.html|test-report.html|tests" \
@@ -54,7 +58,11 @@ book:: test docs mkdocs-build ## compile the companion documentation book
 	@rm -rf _book && mkdir -p _book
 
 	@printf "{\n" > _book/links.json
-	@printf '  "API": "https://pkg.go.dev/%s"' "$(GO_MODULE)" >> _book/links.json
+	@printf '  "API": "./docs/API/index.html"' >> _book/links.json
+	@if [ -n "$(OFFICIAL_DOCS_URL)" ]; then \
+	  printf ",\n" >> _book/links.json; \
+	  printf '  "Official Docs": "%s"' "$(OFFICIAL_DOCS_URL)" >> _book/links.json; \
+	fi
 	@first=0; \
 	for entry in $(BOOK_SECTIONS); do \
 	  name=$${entry%%|*}; \
