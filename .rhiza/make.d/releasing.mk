@@ -15,15 +15,15 @@ _DRY_RUN_FLAG := $(if $(DRY_RUN),--dry-run,)
 
 ##@ Releasing and Versioning
 bump: pre-bump ## bump version of the project (supports DRY_RUN=1)
-	${UVX_BIN} "rhiza-tools>=0.3.1" bump $(_DRY_RUN_FLAG);
+	${UVX_BIN} "rhiza-tools>=0.3.5b1" bump $(_DRY_RUN_FLAG); --language go
 	@$(MAKE) post-bump
 
 release: pre-release install-uv ## create tag and push to remote repository triggering release workflow (supports DRY_RUN=1)
-	${UVX_BIN} "rhiza-tools>=0.3.1" release $(_DRY_RUN_FLAG);
+	${UVX_BIN} "rhiza-tools>=0.3.5b1" release $(_DRY_RUN_FLAG);
 	@$(MAKE) post-release
 
 publish: pre-release install-uv ## bump version, create tag and push in one step (supports DRY_RUN=1)
-	${UVX_BIN} "rhiza-tools>=0.3.1" release --with-bump $(_DRY_RUN_FLAG);
+	${UVX_BIN} "rhiza-tools>=0.3.5b1" release --with-bump $(_DRY_RUN_FLAG);
 	@$(MAKE) post-release
 
 release-status: ## show release workflow status and latest release information
