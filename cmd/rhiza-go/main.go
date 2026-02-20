@@ -24,15 +24,23 @@ func main() {
 
 // run executes the application logic, writing output to w.
 func run(w io.Writer) error {
-	fmt.Fprintln(w, "Rhiza-Go - Template System for Go Projects")
-	fmt.Fprintln(w, "=============================================")
+	if _, err := fmt.Fprintln(w, "Rhiza-Go - Template System for Go Projects"); err != nil {
+		return err
+	}
+	if _, err := fmt.Fprintln(w, "============================================="); err != nil {
+		return err
+	}
 
 	cfg, err := config.Load()
 	if err != nil {
 		return fmt.Errorf("loading configuration: %w", err)
 	}
 
-	fmt.Fprintf(w, "Version: %s\n", cfg.Version)
-	fmt.Fprintf(w, "Go Version: %s\n", cfg.GoVersion)
+	if _, err := fmt.Fprintf(w, "Version: %s\n", cfg.Version); err != nil {
+		return err
+	}
+	if _, err := fmt.Fprintf(w, "Go Version: %s\n", cfg.GoVersion); err != nil {
+		return err
+	}
 	return nil
 }
