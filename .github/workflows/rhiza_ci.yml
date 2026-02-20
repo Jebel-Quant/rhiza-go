@@ -17,7 +17,7 @@ jobs:
       go-versions: ${{ steps.versions.outputs.matrix }}
       go-current: ${{ steps.versions.outputs.current }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6.0.2
     - name: Derive version matrix from .go-version
       id: versions
       run: |
@@ -37,10 +37,10 @@ jobs:
         go-version: ${{ fromJson(needs.setup.outputs.go-versions) }}
     
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6.0.2
     
     - name: Set up Go
-      uses: actions/setup-go@v5
+      uses: actions/setup-go@v6.0.0
       with:
         go-version: ${{ matrix.go-version }}
     
@@ -73,10 +73,10 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6.0.2
     
     - name: Set up Go
-      uses: actions/setup-go@v5
+      uses: actions/setup-go@v6.0.0
       with:
         go-version-file: .go-version
     
@@ -94,10 +94,10 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6.0.2
     
     - name: Set up Go
-      uses: actions/setup-go@v5
+      uses: actions/setup-go@v6.0.0
       with:
         go-version-file: .go-version
     
