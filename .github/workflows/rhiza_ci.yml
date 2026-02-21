@@ -25,7 +25,16 @@ jobs:
         major=$(echo "$current" | cut -d. -f1)
         minor=$(echo "$current" | cut -d. -f2)
         prev="${major}.$((minor - 1))"
-        echo "matrix=[\"${prev}\",\"${current}\"]" >> "$GITHUB_OUTPUT"
+        # Extract minimum Go version required by go.mod
+        gomod_min=$(grep -m1 '^\s*go\s' go.mod | awk '{print $2}')
+        gomod_minor=$(echo "$gomod_min" | cut -d. -f2)
+        gomod_minor=${gomod_minor:-0}
+        prev_minor=$((minor - 1))
+        if [ "$prev_minor" -ge "$gomod_minor" ]; then
+          echo "matrix=[\"${prev}\",\"${current}\"]" >> "$GITHUB_OUTPUT"
+        else
+          echo "matrix=[\"${current}\"]" >> "$GITHUB_OUTPUT"
+        fi
         echo "current=${current}" >> "$GITHUB_OUTPUT"
 
   test:
