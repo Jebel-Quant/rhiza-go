@@ -28,3 +28,11 @@ values = [
 
 [[tool.bumpversion.files]]
 filename = "VERSION"
+
+[[tool.bumpversion.files]]
+filename = ".rhiza/template-bundles.yml"
+version_template = "version: {current_version}"
+search = "version: {current_version}"
+replace = "version: {new_version}"
+regex = false
+ignore_missing_files = true
