@@ -1,127 +1,199 @@
 # Rhiza Copilot Instructions
 
-You are working in a project that utilises the `rhiza` framework. Rhiza is a collection of reusable
-configuration templates and tooling designed to standardise and streamline modern Go development.
+You are working in a Go project that uses the **Rhiza** framework — a living template system that
+standardises project structure, build tooling, CI/CD, and code quality for Go applications.
 
-As a Rhiza-based project, this workspace adheres to specific conventions for structure, dependency management, and automation.
+Module path: `github.com/jebel-quant/rhiza-go`
 
-## Development Environment
+---
 
-The project uses `make` and Go tooling for development tasks. Go version management is handled via the `.go-version` file.
+## Critical Rules
 
-### Prerequisites
+1. **Never edit files under `.rhiza/`** — they are managed by the upstream template and will be overwritten on sync. Customise behaviour via hooks in the root `Makefile` or `local.mk`.
+2. **Always use `make` targets** — never run `go fmt`, `golangci-lint`, or test tools directly. The Makefile ensures correct flags, environment, and tool versions.
+3. **Run `make fmt` then `make test` before finishing** — these are the quality gates enforced by session-end hooks.
+4. **Go version is pinned in `.go-version`** — currently `1.25.5`. This is the single source of truth; do not hardcode version numbers elsewhere.
+5. **Project version lives in `VERSION`** — bump it via `make bump`, never edit directly.
 
-- **Git**: Required for version control
-- **Make**: Command runner for all development tasks
-- **Go**: Install the version specified in `.go-version` (currently 1.23) from https://go.dev/dl/
+---
 
-### Environment Setup
+## Development Commands
 
-Setting up your environment is simple:
+| Command | Purpose |
+|---------|---------|
+| `make install` | Download modules, install dev tools (`golangci-lint`, `goimports`, `gotestsum`, etc.) |
+| `make build` | Compile all packages and binaries to `bin/` |
+| `make test` | Run tests with `gotestsum`, race detector, coverage report |
+| `make test-verbose` | Verbose test output |
+| `make test-coverage` | Coverage with threshold check (default 80%) |
+| `make fmt` | Format with `go fmt` + `goimports` |
+| `make lint` | Run `golangci-lint` (25+ linters defined in `.golangci.yml`) |
+| `make vet` | Run `go vet ./...` |
+| `make tidy` | Run `go mod tidy` |
+| `make clean` | Remove build artifacts, caches, and stale branches |
+| `make book` | Generate documentation site |
 
-```bash
-make install
+---
+
+## Architecture & Dependency Rules
+
+```
+cmd/  ->  pkg/  ->  (external deps)
+  |         |
+internal/  <-  (not imported by pkg/)
 ```
 
-This single command handles everything:
-1. Verifies Go is installed and matches `.go-version`
-2. Downloads module dependencies via `go mod download`
-3. Installs development tools (`golangci-lint`, `goimports`, etc.)
+- **`cmd/<app>/`** — Binary entry points. Each has `func main()` that delegates to a testable `run(w io.Writer) error` function. Imports `pkg/` and `internal/`, never the reverse.
+- **`pkg/`** — Public library packages, importable by external consumers. Must NOT import `internal/`.
+- **`internal/`** — Private helpers. Go enforces that external modules cannot import these.
+- **`docker/`** — Dockerfile and build context.
+- **`.rhiza/`** — Framework-managed files (Makefile extensions, scripts, assets). **Do not edit.**
+- **`.github/`** — Workflows, hooks, agents, and actions.
 
-### Verifying Installation
+### Current Packages
 
-After installation completes, verify everything works:
+| Package | Responsibility |
+|---------|---------------|
+| `cmd/rhiza-go` | CLI entry point; wires `pkg/config` and writes to stdout |
+| `pkg/config` | Loads application config from `.go-version`, `VERSION`; parses `.rhiza/template.yml` |
+| `internal/utils` | Path sanitisation (`SanitizePath`), slice helpers (`Contains`) |
 
-```bash
-make test  # Should run successfully
-```
+### Adding New Code
 
-### Common Development Commands
+- New binary: `cmd/<name>/main.go` with a testable `run()` function
+- New public package: `pkg/<name>/` with Go doc comments on all exports
+- New internal package: `internal/<name>/`
+- New Make target: root `Makefile` or `local.mk` (never `.rhiza/`)
+- New dependency: `go get <module>` then `go mod tidy`
 
-- **Install Dependencies**: `make install` (downloads Go modules and installs dev tools)
-- **Run Tests**: `make test` (runs `go test` with coverage and race detection)
-- **Format Code**: `make fmt` (runs `go fmt`, `goimports`, and `golangci-lint --fix`)
-- **Lint Code**: `make lint` (runs `golangci-lint` with 25+ linters)
-- **Build Documentation**: `make book` (generates Go documentation)
-- **Clean Environment**: `make clean` (removes build artifacts and stale branches)
+---
 
-### Troubleshooting
+## Go Coding Conventions
 
-- **Installation fails**: Ensure Go is installed and matches the version in `.go-version`.
-- **Go version issues**: The `.go-version` file is the single source of truth. Install the correct version from https://go.dev/dl/.
-- **Pre-commit failures**: Run `make fmt` to auto-fix most formatting issues.
-- **Module issues**: Run `go mod tidy` to clean up `go.mod` and `go.sum`.
+Follow [Effective Go](https://go.dev/doc/effective_go) and the patterns already in the codebase:
 
-### Important Notes for Agents
+### Error Handling
 
-- **No Virtual Environment**: Go does not use virtual environments. Tools are installed to `$GOPATH/bin`.
-- **Go Version**: The repository specifies the Go version in `.go-version`.
-- **All Commands Through Make**: Always use `make` targets rather than running tools directly to ensure consistency.
+- Always wrap errors with context: `fmt.Errorf("loading config: %w", err)`
+- Return errors instead of calling `os.Exit` — only `main()` should exit
+- Use `%w` for wrapping (allows `errors.Is` / `errors.As` upstream)
 
-### Customizing Setup with Hooks
+### Naming
 
-The Makefile provides hooks for customizing the setup process. Add these to the root `Makefile`:
+- Exported symbols get Go doc comments: `// Load returns a Config populated from project files.`
+- Package names are lowercase, single-word where possible
+- Interfaces are named by behaviour: `Reader`, `Writer`, `Closer`
+- Avoid stutter: `config.Config` is fine, but `config.ConfigLoader` is not
+
+### Testing
+
+- Test files live next to source: `config.go` -> `config_test.go`
+- Use **table-driven tests** for systematic edge-case coverage:
+  ```go
+  tests := []struct {
+      name    string
+      input   string
+      want    string
+      wantErr bool
+  }{
+      {name: "valid", input: "foo", want: "foo"},
+      {name: "empty", input: "", wantErr: true},
+  }
+  for _, tt := range tests {
+      t.Run(tt.name, func(t *testing.T) { ... })
+  }
+  ```
+- Use `t.TempDir()` for filesystem tests (automatic cleanup)
+- Use `t.Helper()` in test helper functions
+- Prefer injecting `io.Writer` over mocking `os.Stdout`
+- Entry points use the **testable main** pattern: `run(w io.Writer) error`
+
+### Security
+
+- Validate file paths before I/O — use `filepath.Clean` and verify the result stays within bounds
+- Annotate intentional security exceptions with `// #nosec G304 -- reason`
+- The linter suite includes `gosec` — it will flag unsafe patterns
+
+### Imports
+
+- Group imports: stdlib, then a blank line, then external, then internal
+- `goimports` (run via `make fmt`) handles ordering automatically
+
+---
+
+## Linting
+
+The project uses `golangci-lint` with 25+ linters configured in `.golangci.yml`. Key linters include:
+
+- `errcheck` — unchecked errors (with type assertion checks)
+- `govet` — all analysers enabled
+- `gosec` — security issues (excluded from `_test.go` files)
+- `revive` — Go style (var-naming, exported, error conventions)
+- `staticcheck` — advanced static analysis
+- `gocritic` — opinionated suggestions
+- `misspell` — typos in comments/strings
+- `bodyclose` — unclosed HTTP response bodies
+- `unparam` — unused function parameters
+
+Test files are exempt from `gosec` and `errcheck`.
+
+---
+
+## Makefile Hook System
+
+Customise lifecycle behaviour with double-colon hooks in the root `Makefile`:
 
 ```makefile
-# Run before make install
 pre-install::
-	@echo "Installing system dependencies..."
+	@echo "Custom pre-install step"
 
-# Run after make install
 post-install::
-	@echo "Running custom setup..."
+	@echo "Custom post-install step"
 ```
 
-**Available hooks:**
-- `pre-install` / `post-install`: Runs around `make install`
-- `pre-sync` / `post-sync`: Runs around template synchronization
-- `pre-validate` / `post-validate`: Runs around validation
-- `pre-release` / `post-release`: Runs around releases
+Available hooks: `pre-install`/`post-install`, `pre-sync`/`post-sync`, `pre-validate`/`post-validate`, `pre-release`/`post-release`, `pre-bump`/`post-bump`.
 
-**Note**: Use double-colon syntax (`::`) for hooks to allow multiple definitions. See `.rhiza/make.d/README.md` for more details.
+---
 
-### Cloud/CI Environment Setup
+## CI/CD Environment
 
-The Copilot coding agent environment is automatically configured via official GitHub mechanisms:
+- **`copilot-setup-steps.yml`** — Runs before the agent: sets up Go (from `.go-version`), configures git auth, runs `make install`.
+- **`hooks.json`** — Session lifecycle hooks:
+  - `sessionStart` validates Go is available, correct version, `go.mod` exists, dev tools present
+  - `sessionEnd` runs `make fmt`, `make lint`, and `make test` as quality gates
+- Dev tools are installed to `$GOPATH/bin`. No virtual environments.
 
-- **`.github/workflows/copilot-setup-steps.yml`**: Runs before the agent starts. Sets up Go via `actions/setup-go`, configures git auth for private packages, and runs `make install` to set up a deterministic environment.
-- **`.github/hooks/hooks.json`**: Defines session lifecycle hooks:
-  - `sessionStart`: Validates the environment is correctly set up (Go available, `go.mod` exists)
-  - `sessionEnd`: Runs `make fmt` and `make test` as quality gates after the agent finishes work
-
-These files must exist on the default branch. The agent does not need to run any setup commands manually.
-
-For DevContainers and Codespaces, the `.devcontainer/` configuration and `bootstrap.sh` handle setup automatically. See `docs/DEVCONTAINER.md` for details.
-
-## Project Structure
-
-- `cmd/`: Application entry points
-- `pkg/`: Public library packages
-- `internal/`: Private internal packages
-- `docker/`: Docker configuration
-- `.rhiza/`: Rhiza-specific scripts and configurations
-
-## Coding Standards
-
-- **Style**: Follow [Effective Go](https://go.dev/doc/effective_go) conventions. Use `make fmt` to enforce style.
-- **Testing**: Write tests alongside source code using `go test`. Use table-driven tests where appropriate. Ensure high coverage.
-- **Documentation**: Document code using Go doc comments on exported types, functions, and packages.
-- **Dependencies**: Manage dependencies in `go.mod`. Use `go get` to add dependencies.
-
-## Workflow
-
-1.  **Setup**: Run `make install` to set up the environment.
-2.  **Develop**: Write code in `cmd/`, `pkg/`, or `internal/` with tests alongside.
-3.  **Test**: Run `make test` to verify changes.
-4.  **Format**: Run `make fmt` before committing.
-5.  **Lint**: Run `make lint` to check for issues.
+---
 
 ## Key Files
 
-- `Makefile`: Main entry point for tasks.
-- `go.mod`: Go module definition and dependencies.
-- `go.sum`: Go module checksums.
-- `.go-version`: Single source of truth for Go version.
-- `.golangci.yml`: Linter configuration (25+ linters).
-- `.github/workflows/copilot-setup-steps.yml`: Agent environment setup (runs before agent starts).
-- `.github/hooks/hooks.json`: Agent session hooks (quality gates).
+| File | Purpose | Editable? |
+|------|---------|-----------|
+| `Makefile` | Thin entry point, includes `.rhiza/rhiza.mk` | Yes |
+| `go.mod` / `go.sum` | Module definition and checksums | Yes (via `go get`/`go mod tidy`) |
+| `.go-version` | Go version (single source of truth) | Yes (bump carefully) |
+| `VERSION` | Project version | Via `make bump` only |
+| `.golangci.yml` | Linter configuration | Synced — override via `local.mk` |
+| `.rhiza/rhiza.mk` | Core build logic | **No** — framework-managed |
+| `.rhiza/make.d/*.mk` | Modular build extensions | **No** — framework-managed |
+| `.github/workflows/*.yml` | CI/CD pipelines | Synced — some are framework-managed |
+| `.github/hooks/` | Agent session hooks | Yes |
+| `.github/agents/` | Copilot agent definitions | Yes |
+
+---
+
+## External Dependency
+
+The module has a single external dependency: `gopkg.in/yaml.v3` for YAML parsing.
+All other imports are from the Go standard library.
+
+---
+
+## Workflow Summary
+
+1. Write code in `cmd/`, `pkg/`, or `internal/` with tests alongside
+2. `make build` — verify it compiles
+3. `make test` — verify tests pass with coverage
+4. `make fmt` — auto-format before committing
+5. `make lint` — check for issues
+6. Commit with a clear, conventional message
