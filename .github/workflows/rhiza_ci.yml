@@ -44,30 +44,30 @@ jobs:
     strategy:
       matrix:
         go-version: ${{ fromJson(needs.setup.outputs.go-versions) }}
-    
+
     steps:
     - uses: actions/checkout@v6.0.2
-    
+
     - name: Set up Go
       uses: actions/setup-go@v6.2.0
       with:
         go-version: ${{ matrix.go-version }}
-    
+
     - name: Install dependencies
       run: make install
-    
+
     - name: Run tests
       run: make test
-    
+
     - name: Run tests with race detector
       run: make test-race
-    
+
     - name: Run govulncheck
       if: matrix.go-version == needs.setup.outputs.go-current
       run: |
         go install golang.org/x/vuln/cmd/govulncheck@latest
         govulncheck ./...
-    
+
     - name: Upload coverage to Codecov
       if: matrix.go-version == needs.setup.outputs.go-current
       uses: codecov/codecov-action@v4
@@ -80,35 +80,35 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
-    
+
     steps:
     - uses: actions/checkout@v6.0.2
-    
+
     - name: Set up Go
       uses: actions/setup-go@v6.2.0
       with:
         go-version-file: .go-version
-    
+
     - name: Check formatting
       run: make check-fmt
-    
+
     - name: Run go vet
       run: make vet
-    
+
     - name: Run golangci-lint
       run: make lint
 
   build:
     name: Build
     runs-on: ubuntu-latest
-    
+
     steps:
     - uses: actions/checkout@v6.0.2
-    
+
     - name: Set up Go
       uses: actions/setup-go@v6.2.0
       with:
         go-version-file: .go-version
-    
+
     - name: Build
       run: make build

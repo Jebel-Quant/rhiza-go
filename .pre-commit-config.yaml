@@ -7,15 +7,14 @@ repos:
     hooks:
       - id: check-toml
       - id: check-yaml
+        args: ["--unsafe"]
       - id: end-of-file-fixer
       - id: trailing-whitespace
-        args: ["--unsafe"]
 
   - repo: https://github.com/dnephin/pre-commit-golang
     rev: v0.5.1
     hooks:
       - id: go-fmt
-      - id: go-vet
       - id: go-imports
       - id: go-mod-tidy
       - id: golangci-lint
@@ -42,9 +41,19 @@ repos:
 
   - repo: local
     hooks:
+      # go-vet runs on packages (./...) rather than individual files
+      - id: go-vet
+        name: go vet
+        language: system
+        entry: bash -c 'go vet ./...'
+        pass_filenames: false
+        types: [go]
+
       - id: goreleaser-check
         name: goreleaser check
         language: system
         entry: goreleaser check --quiet
+        files: \.goreleaser\.ya?ml$
+        pass_filenames: false
         files: \.goreleaser\.ya?ml$
         pass_filenames: false

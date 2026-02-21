@@ -18,7 +18,7 @@ and all tests pass.
 ## Building from source
 
 You'll need to build the project locally to start editing code.
-To install from source, clone the repository from GitHub, 
+To install from source, clone the repository from GitHub,
 navigate to its root, and run the following command:
 
 ```bash
@@ -58,7 +58,7 @@ following:
 ## Code style
 
 We use ruff to enforce our Python coding style.
-Before sending us a pull request, navigate to the project 
+Before sending us a pull request, navigate to the project
 root and run
 
 ```bash

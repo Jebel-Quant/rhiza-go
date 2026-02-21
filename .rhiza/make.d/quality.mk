@@ -6,7 +6,7 @@
 
 ##@ Quality and Formatting
 
-fmt: install-go ## format Go code
+fmt: install-go ## format Go code and run pre-commit hooks
 	@printf "${BLUE}[INFO] Formatting Go code...${RESET}\n"
 	@$(GO_BIN) fmt ./...
 	@gofmt -s -w .
@@ -16,6 +16,10 @@ fmt: install-go ## format Go code
 	  "$$($(GO_BIN) env GOPATH)/bin/goimports" -w .; \
 	else \
 	  printf "${YELLOW}[WARN] goimports not found, skipping import formatting${RESET}\n"; \
+	fi
+	@if [ -f .pre-commit-config.yaml ]; then \
+	  printf "${BLUE}[INFO] Running pre-commit hooks...${RESET}\n"; \
+	  PATH="$$($(GO_BIN) env GOPATH)/bin:$$PATH" $(UVX_BIN) pre-commit run --all-files || true; \
 	fi
 
 check-fmt: install-go ## check if Go code is formatted

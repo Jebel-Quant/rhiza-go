@@ -62,5 +62,3 @@ type Template struct {
 
 func LoadTemplate(path string) (*Template, error)
     LoadTemplate reads template configuration from .rhiza/template.yml
-
-

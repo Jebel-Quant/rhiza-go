@@ -60,7 +60,7 @@ install-go: ## ensure Go is installed at the required version
 
 install: pre-install install-go install-uv ## install Go dependencies
 	@printf "${BLUE}[INFO] Installing Go dependencies...${RESET}\n"
-	
+
 	# Download dependencies
 	@if [ -f "go.mod" ]; then \
 	  $(GO_BIN) mod download || { printf "${RED}[ERROR] Failed to download dependencies${RESET}\n"; exit 1; }; \
@@ -69,7 +69,7 @@ install: pre-install install-go install-uv ## install Go dependencies
 	else \
 	  printf "${YELLOW}[WARN] No go.mod found, skipping install${RESET}\n"; \
 	fi
-	
+
 	# Install development tools (run outside module dir to avoid go.mod/go.sum interaction)
 	@printf "${BLUE}[INFO] Installing development tools...${RESET}\n"
 	@cd /tmp && $(GO_BIN) install github.com/golangci/golangci-lint/cmd/golangci-lint@latest || true
@@ -80,7 +80,13 @@ install: pre-install install-go install-uv ## install Go dependencies
 	@cd /tmp && $(GO_BIN) install github.com/princjef/gomarkdoc/cmd/gomarkdoc@latest || true
 	@cd /tmp && $(GO_BIN) install github.com/goreleaser/goreleaser/v2@latest || true
 	@curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b "$$($(GO_BIN) env GOPATH)/bin" || true
-	
+
+	# Install pre-commit hooks if config exists (uses uvx, installed above)
+	@if [ -f .pre-commit-config.yaml ]; then \
+	  printf "${BLUE}[INFO] Installing pre-commit hooks...${RESET}\n"; \
+	  $(UVX_BIN) pre-commit install; \
+	fi
+
 	@$(MAKE) post-install
 
 build: install ## build Go binaries
@@ -92,7 +98,7 @@ build: install ## build Go binaries
 
 clean: ## Clean project artifacts and stale local branches
 	@printf "%bCleaning project...%b\n" "$(BLUE)" "$(RESET)"
-	
+
 	# Clean Go build cache and test cache
 	@$(GO_BIN) clean -cache -testcache -modcache || true
 
@@ -100,7 +106,7 @@ clean: ## Clean project artifacts and stale local branches
 	@git clean -d -X -f \
 		-e '!.env' \
 		-e '!.env.*'
-	
+
 	# Remove build artifacts
 	@rm -rf \
 		dist \
@@ -112,9 +118,9 @@ clean: ## Clean project artifacts and stale local branches
 		test-report.html \
 		*.test \
 		*.prof
-	
+
 	@printf "%bRemoving local branches with no remote counterpart...%b\n" "$(BLUE)" "$(RESET)"
-	
+
 	@git fetch --prune
-	
+
 	@git branch -vv | awk '/: gone]/{print $$1}' | xargs -r git branch -D
