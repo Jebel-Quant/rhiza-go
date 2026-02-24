@@ -79,6 +79,7 @@ export RHIZA_LOGO
 
 # Hook targets (double-colon rules allow multiple definitions)
 # Note: pre-install/post-install are defined in bootstrap.mk
+# Note: install-go/install/build are defined in bootstrap-go.mk
 # Note: pre-bump/post-bump/pre-release/post-release are defined in releasing.mk
 pre-sync:: ; @:
 post-sync:: ; @:

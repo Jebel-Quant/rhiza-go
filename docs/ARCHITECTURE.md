@@ -169,8 +169,8 @@ flowchart TD
 
 | Target | Extension | What it does |
 |--------|-----------|-------------|
-| `make install` | `bootstrap.mk` | Verify Go version, `go mod download`, install tools |
-| `make build` | `bootstrap.mk` | `go build` to `bin/` |
+| `make install` | `bootstrap-go.mk` | Verify Go version, `go mod download`, install tools |
+| `make build` | `bootstrap-go.mk` | `go build` to `bin/` |
 | `make test` | `test.mk` | `go test -race -cover ./...` with reports |
 | `make fmt` | `quality.mk` | `go fmt`, `goimports`, `golangci-lint --fix` |
 | `make lint` | `quality.mk` | `golangci-lint run` (25+ linters via `.golangci.yml`) |
