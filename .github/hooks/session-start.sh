@@ -17,7 +17,7 @@ fi
 # ── Go version check ────────────────────────────────────────────────
 if [ -f ".go-version" ]; then
     EXPECTED_VERSION=$(tr -d '[:space:]' < .go-version)
-    # Extract version from 'go version go1.25.5 ...' output
+    # Extract version from 'go version go1.25.6 ...' output
     INSTALLED_FULL=$(go version | grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?' | head -1)
     INSTALLED_MAJOR_MINOR=$(echo "$INSTALLED_FULL" | grep -oE '^[0-9]+\.[0-9]+')
     EXPECTED_MAJOR_MINOR=$(echo "$EXPECTED_VERSION" | grep -oE '^[0-9]+\.[0-9]+')

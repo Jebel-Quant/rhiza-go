@@ -12,7 +12,7 @@ Module path: `github.com/jebel-quant/rhiza-go`
 1. **Never edit files under `.rhiza/`** — they are managed by the upstream template and will be overwritten on sync. Customise behaviour via hooks in the root `Makefile` or `local.mk`.
 2. **Always use `make` targets** — never run `go fmt`, `golangci-lint`, or test tools directly. The Makefile ensures correct flags, environment, and tool versions.
 3. **Run `make fmt` then `make test` before finishing** — these are the quality gates enforced by session-end hooks.
-4. **Go version is pinned in `.go-version`** — currently `1.25.5`. This is the single source of truth; do not hardcode version numbers elsewhere.
+4. **Go version is pinned in `.go-version`** — currently `1.25.6`. This is the single source of truth; do not hardcode version numbers elsewhere.
 5. **Project version lives in `VERSION`** — bump it via `make bump`, never edit directly.
 
 ---

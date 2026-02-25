@@ -8,7 +8,7 @@ This file provides context and rules for Claude Code when working in this reposi
 standardises project structure, build tooling, CI/CD, and code quality for Go development.
 
 - **Module**: `github.com/jebel-quant/rhiza-go`
-- **Go version**: pinned in `.go-version` (currently `1.25.5`)
+- **Go version**: pinned in `.go-version` (currently `1.25.6`)
 - **Project version**: `VERSION` file (currently `0.2.2`)
 - **External deps**: `gopkg.in/yaml.v3` only; everything else is stdlib
 
