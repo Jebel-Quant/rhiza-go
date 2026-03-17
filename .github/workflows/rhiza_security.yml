@@ -29,7 +29,7 @@ jobs:
       - uses: actions/checkout@v6.0.2
 
       - name: Set up Go
-        uses: actions/setup-go@v6.2.0
+        uses: actions/setup-go@v6.3.0
         with:
           go-version-file: .go-version
           cache: true
@@ -47,12 +47,12 @@ jobs:
       - uses: actions/checkout@v6.0.2
 
       - name: Set up Go
-        uses: actions/setup-go@v6.2.0
+        uses: actions/setup-go@v6.3.0
         with:
           go-version-file: .go-version
           cache: true
 
       - name: Run gosec
-        uses: securego/gosec@v2.23.0
+        uses: securego/gosec@v2.24.7
         with:
           args: ./...
