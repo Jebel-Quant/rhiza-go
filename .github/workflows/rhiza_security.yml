@@ -53,6 +53,6 @@ jobs:
           cache: true
 
       - name: Run gosec
-        uses: securego/gosec@v2.24.7
+        uses: securego/gosec@v2.25.0
         with:
           args: ./...
