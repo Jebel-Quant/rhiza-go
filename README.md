@@ -216,6 +216,7 @@ rhiza-go/
 ├── .rhiza/           # Rhiza-specific scripts and configurations
 │   ├── make.d/       # Modular Makefile components
 │   │   ├── bootstrap.mk
+│   │   ├── bootstrap-go.mk
 │   │   ├── test.mk
 │   │   ├── quality.mk
 │   │   └── docs.mk
