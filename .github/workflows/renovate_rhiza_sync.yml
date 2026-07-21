@@ -17,7 +17,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6.0.3
+        uses: actions/checkout@v6.1.0
         with:
           ref: ${{ github.ref }}
           token: ${{ secrets.PAT_TOKEN || github.token }}
